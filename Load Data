@@ -1,0 +1,93 @@
+---
+title: "Data Visualization Group Project"
+author: "Jieyi Cai"
+date: "2020/11/30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars,  include=FALSE}
+library(tidyverse)
+library(extrafont)
+library(ggtext)
+library(janitor)
+library(ggthemes)
+library(dplyr)
+library(countrycode)
+library(ggplot2)
+loadfonts(device="win")
+```
+
+## Clean Data
+
+```{r data cleaning}
+data <- read.csv("Data visualization final data.csv") %>% 
+  janitor::clean_names()
+
+#change name
+colnames(data)[1] <- "country"
+
+#select time
+data1 <- data %>% 
+  select(country:series_code,x2000_yr2000:x2020_yr2020)
+
+#change names
+colnames(data1)[5:25] <- c(2000:2020)
+
+#pivot longer
+data2 <- tidyr::pivot_longer(data1, cols = "2000":"2020", names_to = "Year", values_to = "count")
+
+#set the missing data as NA
+data2[data2 == ".."] <- NA
+
+#add continent information
+data2$continent <- countrycode(sourcevar = data2$country,
+                               origin = "country.name",
+                               destination = "continent")
+
+#variable lists
+all_variables <- data %>% distinct(Series)
+```
+
+# Plot1
+
+```{r literacy rate, warning = FALSE}
+literacy_data <- data2 %>% 
+  filter(series == "Adult literacy rate, population 15+ years, male (%)" |
+           series == "Adult literacy rate, population 15+ years, female (%)"|
+           series == "Youth literacy rate, population 15-24 years, male (%)"|
+           series == "Youth literacy rate, population 15-24 years, female (%)"|
+           series == "Adult literacy rate, population 15+ years, both sexes (%)"|
+           series == "Adult literacy rate, population 15+ years, gender parity index (GPI)"|
+           series == "Youth literacy rate, population 15-24 years, both sexes (%)"|
+           series == "Youth literacy rate, population 15-24 years, gender parity index (GPI)"|
+           series == "GDP per capita (current US$)"|
+           series == "GDP per capita, PPP (current international $)"|
+           series == "GDP at market prices (current US$)")
+
+Morocco_GPD <- literacy_data %>% 
+  filter(series == "GDP per capita (current US$)" & country == "Morocco")
+
+Morocco_literacy <- literacy_data %>% 
+  filter(country == "Morocco")
+
+Adult_lit <- literacy_data %>% 
+  filter(series == "Adult literacy rate, population 15+ years, both sexes (%)") %>%
+  filter(Year == 2018) %>% 
+  filter(!is.na(count)) %>% 
+  filter(!is.na(continent))
+
+xx <- Adult_lit %>% 
+  arrange(count) %>% 
+  mutate(country = factor(country, levels = country))
+
+```
