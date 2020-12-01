@@ -1,0 +1,94 @@
+---
+title: "Data_Vis_Group_Project"
+author: "Carlota Castro"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: true
+    toc: yes
+    toc_float: yes
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+
+```{r libraries, include=FALSE}
+#Load the corresponding libraries
+library(tidyverse)
+library(extrafont)
+library(vroom)
+library(ggtext)
+library(gapminder)
+library(ggrepel)
+library(patchwork)
+library(gghighlight)
+library(skimr)
+library(here)
+library(plotly)
+library(xlsx)
+
+#remotes::install_github("kjhealy/nycdogs")
+library(nycdogs)
+library(sf) # for geospatial visualisation
+
+#Windows
+#loadfonts(device="win")
+#MAC
+loadfonts(device="pdf")
+```
+
+```{r read in the data}
+#Read in the data
+userBasedData_raw <- read.csv(file="Morocco.csv",header=TRUE,na.strings=c("..","NA"))
+
+#Take a quick look at what is in the data
+#glimpse(userBasedData_raw)
+
+```
+
+```{r Morocco data}
+
+Morocco <- userBasedData_raw %>%
+  select(Country.Name,Country.Code,Series.Code,X2018..YR2018.,X1994..YR1994.)%>%
+  filter(Series.Code %in% c("LO.PISA.SCI", "LO.PISA.REA","LO.PISA.MAT","SE.ADT.1524.LT.ZS","NY.GDP.MKTP.CD","SE.XPD.TOTL.GD.ZS"))
+
+list_NAs<-which(is.na(Morocco))
+Morocco1<-Morocco%>%
+  pivot_wider(names_from=Series.Code,values_from=X2018..YR2018.)
+
+Morocco1_PISA<-Morocco1%>%
+  filter(!is.na(LO.PISA.SCI)&!is.na(LO.PISA.REA)&!is.na(LO.PISA.MAT))%>%
+  select(Country.Name,Country.Code,LO.PISA.SCI,LO.PISA.REA,LO.PISA.MAT)
+
+write.xlsx(Morocco1_PISA, file = "Morocco_PISA.xlsx",
+      sheetName = "MoroccoPisa", append = FALSE)
+
+Morocco1_Lit<-Morocco1%>%filter(!is.na(SE.ADT.1524.LT.ZS))%>%
+  select(Country.Name,Country.Code,SE.ADT.1524.LT.ZS)
+
+write.xlsx(Morocco1_Lit, file = "Morocco_lit.xlsx",
+      sheetName = "MoroccoLit", append = FALSE)
+
+Morocco1_expend<-Morocco1%>%filter(!is.na(SE.XPD.TOTL.GD.ZS)&!is.na(NY.GDP.MKTP.CD))%>%
+    select(Country.Name,SE.XPD.TOTL.GD.ZS,NY.GDP.MKTP.CD)%>%
+  mutate(Expenditure=SE.XPD.TOTL.GD.ZS*NY.GDP.MKTP.CD)
+
+```
+
+
