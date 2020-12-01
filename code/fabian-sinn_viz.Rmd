@@ -23,9 +23,35 @@ library(readr)
 
 ```
 
-```{r load_data, include=FALSE}
+```{r load_data, include=FALSE, warning=FALSE}
 
 dataset_base <- read_csv("Data visualization final data.csv")
+dataset_base <- clean_names(dataset_base)
+
+dataset_clean1 <- dataset_base %>% 
+  select(!x1970_yr1970:x1999_yr1999) %>% 
+  select(!x2025_yr2025:x2100_yr2100)
+
+#remove not needed dataset
+remove(dataset_base)
+
+dataset_morocco <- dataset_clean1 %>% 
+  filter(country_name == "Morocco")
 
 ```
+
+# Creating data subsets 
+
+```{r data_manipulation, warning=FALSE}
+
+
+
+
+
+
+
+```
+
+
+
 
