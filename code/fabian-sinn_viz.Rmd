@@ -1,0 +1,31 @@
+---
+title: "fabian-sinn_viz"
+author: "Fabian Sinn"
+date: "01/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r installing_packages, warning=FALSE, message=FALSE}
+
+#I install the following packages
+library(tidyverse)
+library(ggplot2)
+library(data.table)
+library(skimr)
+library(janitor)
+library(ggthemes)
+library(lubridate)
+library(readr)
+
+```
+
+```{r load_data, include=FALSE}
+
+dataset_base <- read_csv("Data visualization final data.csv")
+
+```
+
