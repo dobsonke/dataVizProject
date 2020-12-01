@@ -62,11 +62,23 @@ userBasedData_raw <- read.csv(file="Morocco.csv",header=TRUE,na.strings=c("..","
 
 ```
 
+
+```{r}
+Morocco_sample <- userBasedData_raw %>%
+  select(Country.Name,Country.Code,Series,X2018..YR2018.)%>%
+  filter(Series=="Total net enrolment rate, primary, both sexes (%)")
+
+Morocco_sample2 <- userBasedData_raw %>%
+  #filter(Country.Name=="Germany",Series=="Total net enrolment rate, primary, both sexes (%)")
+  filter(Country.Name=="France",Series=="Gross enrolment ratio, primary and secondary, both sexes (%)")
+ 
+```
+
 ```{r Morocco data}
 
 Morocco <- userBasedData_raw %>%
   select(Country.Name,Country.Code,Series.Code,X2018..YR2018.,X1994..YR1994.)%>%
-  filter(Series.Code %in% c("LO.PISA.SCI", "LO.PISA.REA","LO.PISA.MAT","SE.ADT.1524.LT.ZS","NY.GDP.MKTP.CD","SE.XPD.TOTL.GD.ZS"))
+ filter(Series.Code %in% c("LO.PISA.SCI", "LO.PISA.REA","LO.PISA.MAT","SE.ADT.1524.LT.ZS","NY.GDP.MKTP.CD","SE.XPD.TOTL.GD.ZS","UIS.GER.123"))
 
 list_NAs<-which(is.na(Morocco))
 Morocco1<-Morocco%>%
@@ -74,7 +86,8 @@ Morocco1<-Morocco%>%
 
 Morocco1_PISA<-Morocco1%>%
   filter(!is.na(LO.PISA.SCI)&!is.na(LO.PISA.REA)&!is.na(LO.PISA.MAT))%>%
-  select(Country.Name,Country.Code,LO.PISA.SCI,LO.PISA.REA,LO.PISA.MAT)
+  select(Country.Name,Country.Code,LO.PISA.SCI,LO.PISA.REA,LO.PISA.MAT)%>%
+  mutate(AVG_PISA=(LO.PISA.SCI+LO.PISA.REA+LO.PISA.MAT)/3)
 
 write.xlsx(Morocco1_PISA, file = "Morocco_PISA.xlsx",
       sheetName = "MoroccoPisa", append = FALSE)
@@ -89,6 +102,25 @@ Morocco1_expend<-Morocco1%>%filter(!is.na(SE.XPD.TOTL.GD.ZS)&!is.na(NY.GDP.MKTP.
     select(Country.Name,SE.XPD.TOTL.GD.ZS,NY.GDP.MKTP.CD)%>%
   mutate(Expenditure=SE.XPD.TOTL.GD.ZS*NY.GDP.MKTP.CD)
 
+Morocco1_enrolment<-Morocco1%>%filter(!is.na(UIS.GER.123))%>%
+    select(Country.Name,UIS.GER.123)
 ```
+
+```{r Morocco data 1}
+Moroccos <- userBasedData_raw %>%
+  select(Country.Name,Country.Code,Series,X2017..YR2017.)%>%
+ filter(Series %in% c("Gross enrolment ratio, primary and secondary, both sexes (%)"))
+
+Moroccos<-Moroccos%>%
+  filter(!is.na(X2017..YR2017.))
+#Moroccos$X2017..YR2017.[which(Moroccos$X2017..YR2017.>100)]=100 
+Moroccos<-Moroccos%>%
+  pivot_wider(names_from=Series,values_from=X2017..YR2017.)
+ 
+write.xlsx(Moroccos, file = "Morocco_gross_enrol1.xlsx",
+      sheetName = "Morocco_gross_enrol", append = FALSE)
+
+```
+
 
 
