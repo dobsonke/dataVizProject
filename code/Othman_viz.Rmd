@@ -87,7 +87,8 @@ ggplot(first_plot_df, aes(x=region,y=adult_literacy_rate,fill=region)) + geom_co
       axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
       axis.title.x = element_text(size= 11, family='Oswald',color="black"),
       axis.title.y = element_text(size= 11,family = "Oswald",color="black"),plot.title.position = "plot",
-       plot.caption.position = "plot") + scale_y_continuous(labels = scales::percent, limits=c(0,1))
+       plot.caption.position = "plot",
+       panel.grid.minor=element_blank()) + scale_y_continuous(labels = scales::percent, limits=c(0,1))
 
 ```
   
@@ -113,7 +114,8 @@ ggplot(second_plot_df, aes(x=age_group,y=literacy_rate,fill=Gender)) + geom_col(
       axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
       axis.title.x = element_text(size= 11, family='Oswald',color="black"),
       axis.title.y = element_text(size= 11,family = "Oswald",color="black"),plot.title.position = "plot",
-       plot.caption.position = "plot") + scale_y_continuous(labels = function(x) paste0(x, "%")) +
+       plot.caption.position = "plot",
+       panel.grid.minor=element_blank()) + scale_y_continuous(labels = function(x) paste0(x, "%")) +
 
     geom_curve(
     data = data.frame(x = 1.3, y = 21, xend = 1.05, yend = 50),
@@ -175,7 +177,8 @@ ggplot(data= third_vis_pivot) + geom_area(aes(x=time,y=rate,fill=index)) + geom_
       axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
       axis.title.x = element_text(size= 11, family='Oswald',color="black"),
       axis.title.y = element_text(size= 11,family = "Oswald",color="black"),plot.title.position = "plot",
-       plot.caption.position = "plot") +  scale_y_continuous(labels = function(x) paste0(x, "%")) + 
+       plot.caption.position = "plot",
+      panel.grid.minor=element_blank()) +  scale_y_continuous(labels = function(x) paste0(x, "%")) + 
     geom_curve(
     data = data.frame(x = dmy("01-01-1984"), y = 80, xend = dmy("01-01-1984"), yend = 65),
     mapping = aes(x = x, y = y, xend = xend, yend = yend),
@@ -200,7 +203,7 @@ ggplot(data= third_vis_pivot) + geom_area(aes(x=time,y=rate,fill=index)) + geom_
     aes(x = x, y = y, label = label),
     colour="#FFFFFF",
     family="Oswald",
-    size= 4,
+    size= 3.5,
     hjust = 0.5,
     lineheight = .8,
     inherit.aes = FALSE)
@@ -258,7 +261,8 @@ ggplot(datavis_recent_dbl, aes(x= mean_per_subject,y=score,fill=is_morocco)) + g
       axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
       axis.title.x = element_blank(),
       axis.title.y = element_text(size= 11,family = "Oswald",color="black"),plot.title.position = "plot",
-       plot.caption.position = "plot")+
+       plot.caption.position = "plot",
+      panel.grid.minor=element_blank())+
   
   geom_text(
     data = data.frame(x = "Science", y = 530, label = label4),
