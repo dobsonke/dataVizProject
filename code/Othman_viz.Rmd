@@ -15,13 +15,13 @@ library(scales)
 ```
 
 
-```{r cars}
+```{r,results="hide"}
 
 datavis <- read_csv("Datavis.csv")
 
 ```
 
-```{r}
+```{r,warning=FALSE,message=FALSE,results="hide"}
 
 #Clean names
 datavis <- datavis %>% clean_names()
@@ -64,14 +64,9 @@ datavis_morocco_recent %>%
   mutate(worldwide_literacy_rate = 86.3) %>%
   mutate(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs = as.numeric(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs))
 
-datavis_morocco_recent
-
-
-
-
 
 ```
-```{r}
+```{r,warning=FALSE,message=FALSE}
 #I create a dataframe for my first visualization 
 region <- c('Morocco','World')
 adult_literacy_rate <- c(0.7375,0.863)
@@ -96,7 +91,7 @@ ggplot(first_plot_df, aes(x=region,y=adult_literacy_rate,fill=region)) + geom_co
 
 ```
   
-```{r}
+```{r,warning=FALSE,message=FALSE}
 
 #I read a dataframe made on excel
 second_plot_df <- read_csv("data_second_plot.csv")
@@ -143,13 +138,12 @@ ggplot(second_plot_df, aes(x=age_group,y=literacy_rate,fill=Gender)) + geom_col(
 
 
 ```
-```{r}
+```{r,warning=FALSE,message=FALSE}
 
 
 #Third visualization
 #Read small dataset with corrected data
 third_vis <- read_csv("third vis.csv")
-head(third_vis)
 
 #Change time to date format
 third_vis <- third_vis %>% mutate(time = mdy(time)) 
@@ -165,11 +159,11 @@ third_vis_pivot <- third_vis %>%  mutate(primary_completion_rate_new = net_enrol
 
 #I create labels for my plot
 label2 <- "Education reform"
-label3 <- "Secondary school drop-out rate"
+label3 <- "Lower secondary school drop-out rate"
 
 
 #I create my plot
-ggplot(data= third_vis_pivot) + geom_area(aes(x=time,y=rate,fill=index)) + geom_area(aes(x=time,y=rate,fill=index)) + geom_line(aes(x=time,y=cumulative_drop_out_rate_lower_education),colour="#AE0E24") + theme_minimal() +
+ggplot(data= third_vis_pivot) + geom_area(aes(x=time,y=rate,fill=index)) + geom_area(aes(x=time,y=rate,fill=index)) + geom_line(aes(x=time,y=cumulative_drop_out_rate_lower_education),colour="#FFFFFF") + theme_minimal() +
   labs(title = "Moroccan kids complete primary school..",subtitle ="..But they drop out in secondary school ", x= "Year", y = "% rate", caption = "Source : worldbank.org/education", fill = "") + 
   theme_minimal()  +  scale_fill_manual(values = c("#9AD3FA","36D173"),labels = c("Net enrolment rate in primary school","Completion rate in primary school")) +
   theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
@@ -204,7 +198,7 @@ ggplot(data= third_vis_pivot) + geom_area(aes(x=time,y=rate,fill=index)) + geom_
    geom_text(
     data = data.frame(x = dmy("01-01-1995"), y = 7, label = label3),
     aes(x = x, y = y, label = label),
-    colour="#AE0E24",
+    colour="#FFFFFF",
     family="Oswald",
     size= 4,
     hjust = 0.5,
@@ -217,7 +211,7 @@ ggplot(data= third_vis_pivot) + geom_area(aes(x=time,y=rate,fill=index)) + geom_
 
 
 
-```{r}
+```{r,warning=FALSE,message=FALSE}
 
 #PISA
 
@@ -253,7 +247,7 @@ label6 <- "27% gap"
   
 #I can now create my plot
 ggplot(datavis_recent_dbl, aes(x= mean_per_subject,y=score,fill=is_morocco)) + geom_col(position = "dodge") + ylim(0,600) + theme_minimal() +
-  labs(title = "Morocco performs equally bad in all subjects",subtitle ="Mean PISA score per subject", y = "PISA scores", caption = "Source : worldbank.org/education", fill= "Region") + 
+  labs(title = "Morocco underperforms on all PISA subjects",subtitle ="Mean PISA score per subject", y = "PISA scores", caption = "Source : worldbank.org/education", fill= "Region") + 
   theme_minimal()  +  
   scale_fill_manual(values = c("#C0392B","#D5F5E3")) +
   theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
@@ -291,21 +285,10 @@ ggplot(datavis_recent_dbl, aes(x= mean_per_subject,y=score,fill=is_morocco)) + g
     aes(x = x, y = y, label = label),
     colour="#AE0E24",
     family="Oswald",
-    size= 4,
+    size= 4.5,
     hjust = 0.5,
     lineheight = .8,
     inherit.aes = FALSE)
-
-
-
-
-
-
-
-
-
-
-
 
 
 
