@@ -1,3 +1,4 @@
+
 ---
 title: "Data_Vis_Group_Project"
 author: "Carlota Castro"
@@ -74,42 +75,37 @@ Morocco_sample2 <- userBasedData_raw %>%
  
 ```
 
+
 ```{r Morocco data}
 
 Morocco <- userBasedData_raw %>%
-  select(Country.Name,Country.Code,Series.Code,X2018..YR2018.,X1994..YR1994.)%>%
- filter(Series.Code %in% c("LO.PISA.SCI", "LO.PISA.REA","LO.PISA.MAT","SE.ADT.1524.LT.ZS","NY.GDP.MKTP.CD","SE.XPD.TOTL.GD.ZS","UIS.GER.123"))
+  select(Country.Name,Country.Code,Series,X2018..YR2018.)%>%
+ filter(Series %in% c("PISA: Mean performance on the science scale", "PISA: Mean performance on the reading scale","PISA: Mean performance on the mathematics scale","Youth literacy rate, population 15-24 years, both sexes (%)","GDP at market prices (current US$)	","GDP at market prices (current US$)","Government expenditure on education as % of GDP (%)"))
 
 list_NAs<-which(is.na(Morocco))
 Morocco1<-Morocco%>%
-  pivot_wider(names_from=Series.Code,values_from=X2018..YR2018.)
+  pivot_wider(names_from=Series,values_from=X2018..YR2018.)
 
 Morocco1_PISA<-Morocco1%>%
-  filter(!is.na(LO.PISA.SCI)&!is.na(LO.PISA.REA)&!is.na(LO.PISA.MAT))%>%
-  select(Country.Name,Country.Code,LO.PISA.SCI,LO.PISA.REA,LO.PISA.MAT)%>%
-  mutate(AVG_PISA=(LO.PISA.SCI+LO.PISA.REA+LO.PISA.MAT)/3)
+  filter(!is.na(`PISA: Mean performance on the science scale`)&!is.na(`PISA: Mean performance on the reading scale`)&!is.na(`PISA: Mean performance on the mathematics scale`))%>%
+  select(Country.Name,Country.Code,`PISA: Mean performance on the science scale`,`PISA: Mean performance on the reading scale`,`PISA: Mean performance on the mathematics scale`)%>%
+  mutate(AVG_PISA=(`PISA: Mean performance on the science scale`+`PISA: Mean performance on the reading scale`+`PISA: Mean performance on the mathematics scale`)/3)
 
 write.xlsx(Morocco1_PISA, file = "Morocco_PISA.xlsx",
       sheetName = "MoroccoPisa", append = FALSE)
 
-Morocco1_Lit<-Morocco1%>%filter(!is.na(SE.ADT.1524.LT.ZS))%>%
-  select(Country.Name,Country.Code,SE.ADT.1524.LT.ZS)
+Morocco1_Lit<-Morocco1%>%filter(!is.na(`Youth literacy rate, population 15-24 years, both sexes (%)`))%>%
+  select(Country.Name,Country.Code,`Youth literacy rate, population 15-24 years, both sexes (%)`)
 
 write.xlsx(Morocco1_Lit, file = "Morocco_lit.xlsx",
       sheetName = "MoroccoLit", append = FALSE)
 
-Morocco1_expend<-Morocco1%>%filter(!is.na(SE.XPD.TOTL.GD.ZS)&!is.na(NY.GDP.MKTP.CD))%>%
-    select(Country.Name,SE.XPD.TOTL.GD.ZS,NY.GDP.MKTP.CD)%>%
-  mutate(Expenditure=SE.XPD.TOTL.GD.ZS*NY.GDP.MKTP.CD)
-
-Morocco1_enrolment<-Morocco1%>%filter(!is.na(UIS.GER.123))%>%
-    select(Country.Name,UIS.GER.123)
 ```
 
 ```{r Morocco data 1}
 Moroccos <- userBasedData_raw %>%
   select(Country.Name,Country.Code,Series,X2017..YR2017.)%>%
- filter(Series %in% c("Gross enrolment ratio, primary and secondary, both sexes (%)"))
+ filter(Series %in% c("Gross enrolment ratio, secondary, both sexes (%)"))
 
 Moroccos<-Moroccos%>%
   filter(!is.na(X2017..YR2017.))
@@ -122,5 +118,17 @@ write.xlsx(Moroccos, file = "Morocco_gross_enrol1.xlsx",
 
 ```
 
+```{r Morocco secondary education}
+primary_secondary_raw<-read.csv(file="primary_secondary.csv",header=TRUE,na.strings=c("..","NA"))
 
+primary_secondary <- primary_secondary_raw %>%
+  select(Country.Name,Country.Code,Series,`X2017..YR2017.`) %>%
+   filter(!is.na(X2017..YR2017.)) %>%
+ filter(Series %in% c("Net enrolment rate, secondary, both sexes (%)"))%>%
+  pivot_wider(names_from=Series,values_from=X2017..YR2017.)
 
+ 
+write.xlsx(primary_secondary, file = "Morocco_net_secondary.xlsx",
+      sheetName = "Morocco_net_secondary", append = FALSE)
+
+```
