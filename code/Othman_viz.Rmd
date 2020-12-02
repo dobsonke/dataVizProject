@@ -44,10 +44,11 @@ youth_literacy_rate_population_15_24_years_male_percent_se_adt_1524_lt_ma_zs = a
 ) )
 
 
-
 #I filter for Morocco
 datavis_morocco <- datavis_dbl %>%
-  filter(country_name == "Morocco") 
+  filter(country_name == "Morocco")
+
+view(datavis_morocco)
 
 #I filter for 2018 only
 datavis_morocco_recent <- datavis_morocco %>%
@@ -59,14 +60,32 @@ mean_literacy_worldwide <- datavis_dbl %>%
   na.omit(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs) %>%
   summarize(mean(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs))
 
-#I add the true literacy rate worldwide
+#I add the true literacy rate worldwide to correct for the small error found earlier
 datavis_morocco_recent %>%
   mutate(worldwide_literacy_rate = 86.3) %>%
   mutate(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs = as.numeric(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs))
 
 datavis_morocco_recent
 
+
+
+
+
+```
+```{r}
+#I create a dataframe for my first visualization 
+region <- c('Morocco','World')
+adult_literacy_rate <- c(73.75,86.3)
+first_plot_df <- data.frame(region,adult_literacy_rate)
+
+#First plot : literacy rate Morocco vs worldwide
+ggplot(first_plot_df, aes(x=region,y=adult_literacy_rate)) + geom_col() +
+  ylim(0,100)+ 
+  labs(title = "Morocco is far behind the rest of the world", x= "Region", y = "Adult literacy rate") + 
+  theme_minimal() 
   
 
 
+```
+  
   
