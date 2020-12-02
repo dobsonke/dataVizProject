@@ -1,0 +1,73 @@
+---
+title: "Othman_viz_2"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(readr)
+library(janitor)
+library(lubridate)
+
+
+```
+
+
+```{r cars}
+
+datavis <- read_csv("Datavis.csv")
+
+```
+
+```{r}
+
+#Clean names
+datavis <- datavis %>% clean_names()
+
+#Change the literacy rate from character to numeric for all categories (adult, youth, elderly) and sexes
+datavis_dbl <- datavis %>%
+  mutate(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs = as.numeric(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs),
+         	
+adult_literacy_rate_population_15_years_female_percent_se_adt_litr_fe_zs = as.numeric(	
+adult_literacy_rate_population_15_years_female_percent_se_adt_litr_fe_zs),
+adult_literacy_rate_population_15_years_male_percent_se_adt_litr_ma_zs = as.numeric(adult_literacy_rate_population_15_years_male_percent_se_adt_litr_ma_zs),
+elderly_literacy_rate_population_65_years_both_sexes_percent_uis_lr_ag65 = as.numeric(elderly_literacy_rate_population_65_years_both_sexes_percent_uis_lr_ag65
+),
+elderly_literacy_rate_population_65_years_female_percent_uis_lr_ag65_f = as.numeric(elderly_literacy_rate_population_65_years_female_percent_uis_lr_ag65_f
+),
+elderly_literacy_rate_population_65_years_male_percent_uis_lr_ag65_m = as.numeric(elderly_literacy_rate_population_65_years_male_percent_uis_lr_ag65_m),
+youth_literacy_rate_population_15_24_years_both_sexes_percent_se_adt_1524_lt_zs = as.numeric(youth_literacy_rate_population_15_24_years_both_sexes_percent_se_adt_1524_lt_zs),
+youth_literacy_rate_population_15_24_years_female_percent_se_adt_1524_lt_fe_zs = as.numeric(youth_literacy_rate_population_15_24_years_female_percent_se_adt_1524_lt_fe_zs
+),
+youth_literacy_rate_population_15_24_years_male_percent_se_adt_1524_lt_ma_zs = as.numeric(youth_literacy_rate_population_15_24_years_male_percent_se_adt_1524_lt_ma_zs
+) )
+
+
+
+#I filter for Morocco
+datavis_morocco <- datavis_dbl %>%
+  filter(country_name == "Morocco") 
+
+#I filter for 2018 only
+datavis_morocco_recent <- datavis_morocco %>%
+  filter(time == 2018)
+
+#Mean literacy rate worldwide. Since some countries have NA values, there is a small error
+mean_literacy_worldwide <- datavis_dbl %>%
+  filter(time == 2018) %>%
+  na.omit(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs) %>%
+  summarize(mean(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs))
+
+#I add the true literacy rate worldwide
+datavis_morocco_recent %>%
+  mutate(worldwide_literacy_rate = 86.3) %>%
+  mutate(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs = as.numeric(adult_literacy_rate_population_15_years_both_sexes_percent_se_adt_litr_zs))
+
+datavis_morocco_recent
+
+  
+
+
+  
