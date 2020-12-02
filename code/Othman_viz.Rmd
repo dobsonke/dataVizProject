@@ -9,6 +9,7 @@ library(tidyverse)
 library(readr)
 library(janitor)
 library(lubridate)
+library(scales)
 
 
 ```
@@ -48,8 +49,6 @@ youth_literacy_rate_population_15_24_years_male_percent_se_adt_1524_lt_ma_zs = a
 datavis_morocco <- datavis_dbl %>%
   filter(country_name == "Morocco")
 
-view(datavis_morocco)
-
 #I filter for 2018 only
 datavis_morocco_recent <- datavis_morocco %>%
   filter(time == 2018)
@@ -75,15 +74,14 @@ datavis_morocco_recent
 ```{r}
 #I create a dataframe for my first visualization 
 region <- c('Morocco','World')
-adult_literacy_rate <- c(73.75,86.3)
+adult_literacy_rate <- c(0.7375,0.863)
 first_plot_df <- data.frame(region,adult_literacy_rate)
 
 #First plot : literacy rate Morocco vs worldwide
 ggplot(first_plot_df, aes(x=region,y=adult_literacy_rate,fill=region)) + geom_col() +
-  ylim(0,100)+ 
   labs(title = "Morocco is far behind the rest of the world",subtitle ="Adult literacy rate Worldwide vs Morocco", x= "Region", y = "Adult literacy rate", caption = "Source : worldbank.org/education") + 
   theme_minimal() + 
-  geom_text(label=percent(adult_literacy_rate/100),vjust = -2.3, family = "Oswald", size=4) +
+  geom_text(label= percent(adult_literacy_rate),vjust = -1.5, family = "Oswald", size=4) +
   scale_fill_manual(values = c("#C0392B","#D5F5E3")) + 
   theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
       legend.title = element_text(family = "Oswald"),
@@ -94,8 +92,223 @@ ggplot(first_plot_df, aes(x=region,y=adult_literacy_rate,fill=region)) + geom_co
       axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
       axis.title.x = element_text(size= 11, family='Oswald',color="black"),
       axis.title.y = element_text(size= 11,family = "Oswald",color="black"),plot.title.position = "plot",
-       plot.caption.position = "plot")
+       plot.caption.position = "plot") + scale_y_continuous(labels = scales::percent, limits=c(0,1))
 
 ```
   
+```{r}
+
+#I read a dataframe made on excel
+second_plot_df <- read_csv("data_second_plot.csv")
+head(second_plot_df)
+
+#I create a label for my plot
+label = "30% gap"
+
+#Second plot : literacy rate Morocco vs worldwide
+ggplot(second_plot_df, aes(x=age_group,y=literacy_rate,fill=Gender)) + geom_col(position = "dodge") +
+  ylim(0,100)+ 
+  labs(title = "The youth rises!",subtitle ="Youth literacy rate vs Elderly literacy rate per gender", x= "", y = "Literacy rate", caption = "Source : worldbank.org/education") + 
+  theme_minimal()  +  scale_fill_manual(values = c("#9AD3FA","#FA9ACE")) +
+  theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
+      legend.title = element_text(family = "Oswald"),
+      plot.subtitle=element_text(size=17, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      axis.text.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
+      axis.title.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.title.y = element_text(size= 11,family = "Oswald",color="black"),plot.title.position = "plot",
+       plot.caption.position = "plot") + scale_y_continuous(labels = function(x) paste0(x, "%")) +
+
+    geom_curve(
+    data = data.frame(x = 1.3, y = 21, xend = 1.05, yend = 50),
+    mapping = aes(x = x, y = y, xend = xend, yend = yend),
+    colour = "grey15",
+    size = 0.5,
+    curvature = 0.2,
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    inherit.aes = FALSE) +
+   
+   geom_text(
+    data = data.frame(x = 1, y = 65, label = label),
+    aes(x = x, y = y, label = label),
+    colour="#AE0E24",
+    family="Oswald",
+    size= 6,
+    hjust = 0.5,
+    lineheight = .8,
+    inherit.aes = FALSE)
+
+
+
+
+```
+```{r}
+
+
+#Third visualization
+#Read small dataset with corrected data
+third_vis <- read_csv("third vis.csv")
+head(third_vis)
+
+#Change time to date format
+third_vis <- third_vis %>% mutate(time = mdy(time)) 
+
+#Add a new variable that represents the completion rate of students as a % of that age population. This is done by multiplying the primary completion rate by the net enrolment in primary school.
+#Add a difference column between the new primary completion rate and the net enrolment
+#pivot longer net enrolment and the new variable to make my plot
+third_vis_pivot <- third_vis %>%  mutate(primary_completion_rate_new = net_enrolment_rate_primary*0.01* primary_completion_rate)%>%
+  mutate(difference = net_enrolment_rate_primary - primary_completion_rate_new) %>%
+  mutate(net_enrolment_rate_primary_new = net_enrolment_rate_primary-difference)  %>%
+  pivot_longer(cols = "difference":"net_enrolment_rate_primary_new",names_to = "index",values_to = "rate")
+
+
+#I create labels for my plot
+label2 <- "Education reform"
+label3 <- "Secondary school drop-out rate"
+
+
+#I create my plot
+ggplot(data= third_vis_pivot) + geom_area(aes(x=time,y=rate,fill=index)) + geom_area(aes(x=time,y=rate,fill=index)) + geom_line(aes(x=time,y=cumulative_drop_out_rate_lower_education),colour="#AE0E24") + theme_minimal() +
+  labs(title = "Moroccan kids complete primary school..",subtitle ="..But they drop out in secondary school ", x= "Year", y = "% rate", caption = "Source : worldbank.org/education", fill = "") + 
+  theme_minimal()  +  scale_fill_manual(values = c("#9AD3FA","36D173"),labels = c("Net enrolment rate in primary school","Completion rate in primary school")) +
+  theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
+      legend.title = element_text(family = "Oswald"),
+      legend.text = element_text(family = "Oswald",size=10),
+      plot.subtitle=element_text(size=17, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      axis.text.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
+      axis.title.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.title.y = element_text(size= 11,family = "Oswald",color="black"),plot.title.position = "plot",
+       plot.caption.position = "plot") +  scale_y_continuous(labels = function(x) paste0(x, "%")) + 
+    geom_curve(
+    data = data.frame(x = dmy("01-01-1984"), y = 80, xend = dmy("01-01-1984"), yend = 65),
+    mapping = aes(x = x, y = y, xend = xend, yend = yend),
+    colour = "grey15",
+    size = 0.2,
+    curvature = 0,
+    arrow = arrow(length = unit(2, "mm"), type = "closed"),
+    inherit.aes = FALSE) +
+   
+   geom_text(
+    data = data.frame(x = dmy("01-01-1984"), y = 85, label = label2),
+    aes(x = x, y = y, label = label),
+    colour="black",
+    family="Oswald",
+    size= 4.5,
+    hjust = 0.5,
+    lineheight = .8,
+    inherit.aes = FALSE) +
+  
+   geom_text(
+    data = data.frame(x = dmy("01-01-1995"), y = 7, label = label3),
+    aes(x = x, y = y, label = label),
+    colour="#AE0E24",
+    family="Oswald",
+    size= 4,
+    hjust = 0.5,
+    lineheight = .8,
+    inherit.aes = FALSE)
+
+
+
+```
+
+
+
+```{r}
+
+#PISA
+
+#I filter 2018 only
+#I change PISA scores as numeric variables
+datavis_recent_dbl <- datavis_dbl %>%
+  filter(time == 2018) %>%
+  mutate(pisa_mean_performance_on_the_science_scale_lo_pisa_sci = as.numeric(pisa_mean_performance_on_the_science_scale_lo_pisa_sci),
+pisa_mean_performance_on_the_reading_scale_lo_pisa_rea = as.numeric(pisa_mean_performance_on_the_reading_scale_lo_pisa_rea),
+pisa_mean_performance_on_the_mathematics_scale_lo_pisa_mat = as.numeric(pisa_mean_performance_on_the_mathematics_scale_lo_pisa_mat))
+
+#I only select the necessary columns 
+#I add a column that filters for Morocco in order to group by in further steps
+datavis_recent_dbl <- datavis_recent_dbl  %>%
+  select(c(pisa_mean_performance_on_the_science_scale_lo_pisa_sci,pisa_mean_performance_on_the_reading_scale_lo_pisa_rea,pisa_mean_performance_on_the_mathematics_scale_lo_pisa_mat,country_name)) %>%
+  mutate(is_morocco = ifelse(country_name == "Morocco","Morocco","World"))
+
+
+#I calculate the average for Morocco and for the world
+datavis_recent_dbl <- datavis_recent_dbl %>% na.omit() %>%
+  group_by(is_morocco) %>%
+  summarize(Science = mean(pisa_mean_performance_on_the_science_scale_lo_pisa_sci,na.rm=TRUE), Mathematics= mean(pisa_mean_performance_on_the_mathematics_scale_lo_pisa_mat,na.rm=TRUE), Reading = mean(pisa_mean_performance_on_the_reading_scale_lo_pisa_rea,na.rm=TRUE))
+
+
+#I pivot longer the test scores
+datavis_recent_dbl <- datavis_recent_dbl %>%
+  pivot_longer(cols = "Science":"Reading",names_to = "mean_per_subject",values_to = "score")
+
+#I create labels for my plot
+label4 <- "22% gap"
+label5 <- "25% gap"
+label6 <- "27% gap"
+  
+#I can now create my plot
+ggplot(datavis_recent_dbl, aes(x= mean_per_subject,y=score,fill=is_morocco)) + geom_col(position = "dodge") + ylim(0,600) + theme_minimal() +
+  labs(title = "Morocco performs equally bad in all subjects",subtitle ="Mean PISA score per subject", y = "PISA scores", caption = "Source : worldbank.org/education", fill= "Region") + 
+  theme_minimal()  +  
+  scale_fill_manual(values = c("#C0392B","#D5F5E3")) +
+  theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
+      legend.title = element_text(family = "Oswald"),
+      plot.subtitle=element_text(size=17, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      axis.text.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
+      axis.title.x = element_blank(),
+      axis.title.y = element_text(size= 11,family = "Oswald",color="black"),plot.title.position = "plot",
+       plot.caption.position = "plot")+
+  
+  geom_text(
+    data = data.frame(x = "Science", y = 530, label = label4),
+    aes(x = x, y = y, label = label),
+    colour="#AE0E24",
+    family="Oswald",
+    size= 4.5,
+    hjust = 0.5,
+    lineheight = .8,
+    inherit.aes = FALSE) +
+   
+   geom_text(
+    data = data.frame(x = "Mathematics", y = 530, label = label5),
+    aes(x = x, y = y, label = label),
+    colour="#AE0E24",
+    family="Oswald",
+    size= 4.5,
+    hjust = 0.5,
+    lineheight = .8,
+    inherit.aes = FALSE) +
+  
+   geom_text(
+    data = data.frame(x = "Reading", y = 530, label = label6),
+    aes(x = x, y = y, label = label),
+    colour="#AE0E24",
+    family="Oswald",
+    size= 4,
+    hjust = 0.5,
+    lineheight = .8,
+    inherit.aes = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
   
