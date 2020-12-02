@@ -15,12 +15,39 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r}
+```{r, fig.width = 10}
+data <- read.csv("Data visualization final data.csv") %>% 
+  janitor::clean_names()
+
+#change name
+colnames(data)[1] <- "country"
+
+#select time
+data1 <- data %>% 
+  select(country:series_code,x2000_yr2000:x2020_yr2020)
+
+#change names
+colnames(data1)[5:25] <- c(2000:2020)
+
+#pivot longer
+data2 <- tidyr::pivot_longer(data1, cols = "2000":"2020", names_to = "Year", values_to = "count")
+
+#set the missing data as NA
+data2[data2 == ".."] <- NA
+
+#add continent information
+data2$continent <- countrycode(sourcevar = data2$country,
+                               origin = "country.name",
+                               destination = "continent")
+#data2 taken from clean_data_1
 data_clean <- data2 %>%
   filter(series != "") %>% 
     mutate(Year = as.integer(Year),
          count = as.double(count)) %>% 
     select(-series_code)
+```
+
+```{r}
 
 pisa <- data_clean %>% 
   filter(grepl("PISA: Mean performance on the reading scale", 
@@ -35,14 +62,38 @@ pisa <- data_clean %>%
          female_score = `PISA: Mean performance on the reading scale. Female`
          ) %>% 
   #only countries, with scores, Kosovo has no continent so remove the data
-  filter(!is.na(mean_score), GDP_per_cap <10000, country != 'Kosovo')
+  filter(!is.na(mean_score), country != 'Kosovo') %>% 
+  mutate(highlight = ifelse(country %in% c("China", "Luxembourg", "Morocco", "Vietnam"), TRUE, FALSE),
+         c_label = ifelse(country %in% c("China", "Luxembourg", "Morocco", "Vietnam"), country, ""))
 
-head(pisa, 20)
+```
 
-ggplot(pisa, aes(x = GDP_per_cap_PPP, y = mean_score, colour = continent, label = country)) + 
+```{r}
+
+ggplot(pisa, aes(x = GDP_per_cap, y = mean_score, colour = highlight, label = c_label)) + 
   geom_point() +
   ggrepel::geom_text_repel() +
-  theme_economist()
+  labs(y = "PISA Reading Score", x = "GDP per Capita", 
+       title = "Money can help improve education but it's not the only factor",
+       subtitle = "China and Vietnam excel with low GDP per capita",
+       caption = "Source : worldbank.org/education") +
+  scale_colour_manual(values = c("grey","#C0392B")) +
+  theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
+      legend.title = element_text(family = "Oswald"),
+      legend.position = 'none',
+      plot.subtitle=element_text(size=17, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      axis.text.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
+      axis.title.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.title.y = element_text(size= 11,family = "Oswald",color="black"),
+      plot.title.position = "plot",
+      plot.caption.position = "plot",
+      panel.grid = element_blank(),
+      panel.background = element_rect(fill = 'white', colour = 'white'),
+      axis.ticks = element_blank())
+
+  
 
 
 ```
