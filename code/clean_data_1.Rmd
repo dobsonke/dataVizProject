@@ -55,7 +55,7 @@ data2$continent <- countrycode(sourcevar = data2$country,
                                destination = "continent")
 
 #variable lists
-all_variables <- data %>% distinct(Series)
+all_variables <- data %>% distinct(series)
 ```
 
 # Plot1

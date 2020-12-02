@@ -15,8 +15,36 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r}
+data_clean <- data2 %>%
+  filter(series != "") %>% 
+    mutate(Year = as.integer(Year),
+         count = as.double(count)) %>% 
+    select(-series_code)
+
+pisa <- data_clean %>% 
+  filter(grepl("PISA: Mean performance on the reading scale", 
+               series, fixed = TRUE) | 
+           grepl("GDP per capita", series, fixed = TRUE), 
+         !is.na(count), Year == '2018') %>% 
+  pivot_wider(names_from = series, values_from =count) %>% 
+  rename(GDP_per_cap = `GDP per capita (current US$)`,
+         GDP_per_cap_PPP = `GDP per capita, PPP (current international $)`,
+         mean_score = `PISA: Mean performance on the reading scale`,
+         male_score = `PISA: Mean performance on the reading scale. Male`,
+         female_score = `PISA: Mean performance on the reading scale. Female`
+         ) %>% 
+  #only countries, with scores, Kosovo has no continent so remove the data
+  filter(!is.na(mean_score), GDP_per_cap <10000, country != 'Kosovo')
+
+head(pisa, 20)
+
+ggplot(pisa, aes(x = GDP_per_cap_PPP, y = mean_score, colour = continent, label = country)) + 
+  geom_point() +
+  ggrepel::geom_text_repel() +
+  theme_economist()
+
+
 ```
 
 ## Including Plots
@@ -24,7 +52,29 @@ summary(cars)
 You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
-plot(pressure)
+pivot <- data_clean %>% 
+  pivot_wider(names_from = series, values_from = count)
+model_data <- data_clean %>% 
+  pivot_wider(names_from = series, values_from = count) %>% 
+  select(country, Year,
+         lit_rate = `Adult literacy rate, population 15+ years, both sexes (%)`,
+         edu_spend = `Government expenditure on primary education, US$ (millions)`,
+         enrolment_rate = `Total net enrolment rate, primary, both sexes (%)`,
+         enrolment_ratio = `Gross enrolment ratio, primary and lower secondary, both sexes (%)`,
+         out_of_school = `Rate of out-of-school children of primary school age, both sexes (%)`,
+         early_ed = `Gross enrolment ratio, early childhood education, both sexes (%)`,
+         prim_comp = `Primary completion rate, both sexes (%)`,
+         govt_exp_perc = `Government expenditure on education as % of GDP (%)`
+         )
+skimr::skim(pivot)
+
+head(model_data, 50)
+
+model_data[complete.cases(model_data),]
+
+model1 <- lm(lit_rate ~ edu_spend + enrolment_rate + enrolment_ratio + 
+               out_of_school + early_ed + govt_exp_perc, model_data)
+summary(model1)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
