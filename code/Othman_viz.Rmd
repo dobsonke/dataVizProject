@@ -79,12 +79,22 @@ adult_literacy_rate <- c(73.75,86.3)
 first_plot_df <- data.frame(region,adult_literacy_rate)
 
 #First plot : literacy rate Morocco vs worldwide
-ggplot(first_plot_df, aes(x=region,y=adult_literacy_rate)) + geom_col() +
+ggplot(first_plot_df, aes(x=region,y=adult_literacy_rate,fill=region)) + geom_col() +
   ylim(0,100)+ 
-  labs(title = "Morocco is far behind the rest of the world", x= "Region", y = "Adult literacy rate") + 
-  theme_minimal() 
-  
-
+  labs(title = "Morocco is far behind the rest of the world",subtitle ="Adult literacy rate Worldwide vs Morocco", x= "Region", y = "Adult literacy rate", caption = "Source : worldbank.org/education") + 
+  theme_minimal() + 
+  geom_text(label=percent(adult_literacy_rate/100),vjust = -2.3, family = "Oswald", size=4) +
+  scale_fill_manual(values = c("#C0392B","#D5F5E3")) + 
+  theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
+      legend.title = element_text(family = "Oswald"),
+      legend.position = 'none',
+      plot.subtitle=element_text(size=17, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      axis.text.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
+      axis.title.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.title.y = element_text(size= 11,family = "Oswald",color="black"),plot.title.position = "plot",
+       plot.caption.position = "plot")
 
 ```
   
