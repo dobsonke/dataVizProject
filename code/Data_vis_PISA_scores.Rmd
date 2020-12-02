@@ -132,3 +132,17 @@ write.xlsx(primary_secondary, file = "Morocco_net_secondary.xlsx",
       sheetName = "Morocco_net_secondary", append = FALSE)
 
 ```
+
+```{r Morocco primary education}
+
+primary_secondary <- primary_secondary_raw %>%
+  select(Country.Name,Country.Code,Series,`X2017..YR2017.`) %>%
+   filter(!is.na(X2017..YR2017.)) %>%
+ filter(Series %in% c("Net enrolment rate, primary, both sexes (%)"))%>%
+  pivot_wider(names_from=Series,values_from=X2017..YR2017.)
+
+ 
+write.xlsx(primary_secondary, file = "Morocco_net_primary.xlsx",
+      sheetName = "Morocco_net_primary", append = FALSE)
+
+```
