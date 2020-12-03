@@ -103,7 +103,7 @@ ggplot(pisa, aes(x = GDP_per_cap, y = mean_score, colour = highlight, label = c_
 
 
 
-Above we can see that while GDP clearly plays a role in
+Above we can see that while GDP per capita clearly plays a role in the PISA scores, it appears there are other factors that influence the outcome. We can see certain countries such as Vietnam (which has a similar GDP per capita to Morocco) has exceptional outcomes. The same is true for China which is highly successful given their GDP per capita. On the flipside we have Luxembourg who perform worse than almost all countries with over 35000 GDP per capita. It is clear there are other strong factors that play a role in the educational outcomes of each country.
 
 ```{r pressure, echo=FALSE}
 #These are horrible variables so tried to name them something reasonable
