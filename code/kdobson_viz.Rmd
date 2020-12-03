@@ -16,64 +16,67 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r, fig.width = 10}
-data <- read.csv("Data visualization final data.csv") %>% 
+data <- read.csv("Datavis.csv") %>% 
   janitor::clean_names()
-
-#change name
-colnames(data)[1] <- "country"
-
-#select time
-data1 <- data %>% 
-  select(country:series_code,x2000_yr2000:x2020_yr2020)
-
-#change names
-colnames(data1)[5:25] <- c(2000:2020)
-
-#pivot longer
-data2 <- tidyr::pivot_longer(data1, cols = "2000":"2020", names_to = "Year", values_to = "count")
+# head(data)#change name
+# colnames(data)[1] <- "country"
+# 
+# #select time
+# data1 <- data %>% 
+#   select(country:series_code,x2000_yr2000:x2020_yr2020)
+# 
+# #change names
+# colnames(data1)[5:25] <- c(2000:2020)
+# 
+# #pivot longer
+# data2 <- tidyr::pivot_longer(data1, cols = "2000":"2020", names_to = "Year", values_to = "count")
 
 #set the missing data as NA
-data2[data2 == ".."] <- NA
+data[data == ".."] <- NA
 
 #add continent information
-data2$continent <- countrycode(sourcevar = data2$country,
-                               origin = "country.name",
-                               destination = "continent")
-#data2 taken from clean_data_1
-data_clean <- data2 %>%
-  filter(series != "") %>% 
-    mutate(Year = as.integer(Year),
-         count = as.double(count)) %>% 
-    select(-series_code)
+# data2$continent <- countrycode(sourcevar = data2$country,
+#                                origin = "country.name",
+#                                destination = "continent")
+# #data2 taken from clean_data_1
+# data_clean <- data2 %>%
+#   filter(series != "") %>% 
+#     mutate(Year = as.integer(Year),
+#          count = as.double(count)) %>% 
+#     select(-series_code)
+
+skimr::skim(data)
 ```
 
 ```{r}
 
+data_clean <- data %>% 
+  rename(country = i_country_name) %>% 
+  mutate(year = as.integer(time),
+         mean_read_score = as.integer(pisa_mean_performance_on_the_reading_scale_lo_pisa_rea),
+         GDP_per_cap = as.double(gdp_per_capita_current_us_ny_gdp_pcap_cd),
+         GDP_per_cap_PPP = as.double(gdp_per_capita_ppp_current_international_ny_gdp_pcap_pp_cd),
+         mean_sci_score = as.integer(pisa_mean_performance_on_the_science_scale_lo_pisa_sci),
+         mean_math_score = as.integer(pisa_mean_performance_on_the_mathematics_scale_lo_pisa_mat),
+         mean_score = (mean_math_score + mean_sci_score + mean_read_score)/3)
+
 pisa <- data_clean %>% 
-  filter(grepl("PISA: Mean performance on the reading scale", 
-               series, fixed = TRUE) | 
-           grepl("GDP per capita", series, fixed = TRUE), 
-         !is.na(count), Year == '2018') %>% 
-  pivot_wider(names_from = series, values_from =count) %>% 
-  rename(GDP_per_cap = `GDP per capita (current US$)`,
-         GDP_per_cap_PPP = `GDP per capita, PPP (current international $)`,
-         mean_score = `PISA: Mean performance on the reading scale`,
-         male_score = `PISA: Mean performance on the reading scale. Male`,
-         female_score = `PISA: Mean performance on the reading scale. Female`
-         ) %>% 
+  filter(time == '2018', country != 'Kosovo', !is.na(mean_read_score)) %>% 
   #only countries, with scores, Kosovo has no continent so remove the data
-  filter(!is.na(mean_score), country != 'Kosovo') %>% 
   mutate(highlight = ifelse(country %in% c("China", "Luxembourg", "Morocco", "Vietnam"), TRUE, FALSE),
          c_label = ifelse(country %in% c("China", "Luxembourg", "Morocco", "Vietnam"), country, ""))
 
+
+
+
 ```
 
-```{r}
+```{r, fig.width = 10}
 
 ggplot(pisa, aes(x = GDP_per_cap, y = mean_score, colour = highlight, label = c_label)) + 
   geom_point() +
   ggrepel::geom_text_repel() +
-  labs(y = "PISA Reading Score", x = "GDP per Capita", 
+  labs(y = "Mean PISA Score", x = "GDP per Capita", 
        title = "Money can help improve education but it's not the only factor",
        subtitle = "China and Vietnam excel with low GDP per capita",
        caption = "Source : worldbank.org/education") +
@@ -98,33 +101,36 @@ ggplot(pisa, aes(x = GDP_per_cap, y = mean_score, colour = highlight, label = c_
 
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+
+Above we can see that while GDP clearly plays a role in
 
 ```{r pressure, echo=FALSE}
-pivot <- data_clean %>% 
-  pivot_wider(names_from = series, values_from = count)
+#These are horrible variables so tried to name them something reasonable
 model_data <- data_clean %>% 
-  pivot_wider(names_from = series, values_from = count) %>% 
-  select(country, Year,
-         lit_rate = `Adult literacy rate, population 15+ years, both sexes (%)`,
-         edu_spend = `Government expenditure on primary education, US$ (millions)`,
-         enrolment_rate = `Total net enrolment rate, primary, both sexes (%)`,
-         enrolment_ratio = `Gross enrolment ratio, primary and lower secondary, both sexes (%)`,
-         out_of_school = `Rate of out-of-school children of primary school age, both sexes (%)`,
-         early_ed = `Gross enrolment ratio, early childhood education, both sexes (%)`,
-         prim_comp = `Primary completion rate, both sexes (%)`,
-         govt_exp_perc = `Government expenditure on education as % of GDP (%)`
-         )
-skimr::skim(pivot)
+  mutate(lit_rate = as.double(adult_literacy_rate_population_15_years_both_sexes_se_adt_litr_zs),
+         pri_enrolment_rate = as.double(net_enrolment_rate_primary_both_sexes_se_prm_nenr),
+         sec_enrolment_rate = as.double(net_enrolment_rate_secondary_both_sexes_se_sec_nenr),
+         lower_sec_enrolment_rate = as.double(net_enrolment_rate_lower_secondary_both_sexes_uis_ner_2),
+         drop_out_rate = as.double(cumulative_drop_out_rate_to_the_last_grade_of_lower_secondary_general_education_both_sexes_uis_dr_2_gpv_t),
+         early_ed_rate = as.double(net_enrolment_rate_pre_primary_both_sexes_se_pre_nenr)) %>% 
+  select(country, 
+         year,
+         mean_read_score,
+         GDP_per_cap,
+         lit_rate,
+         pri_enrolment_rate,
+         sec_enrolment_rate,
+         lower_sec_enrolment_rate,
+         drop_out_rate,
+         early_ed_rate                                                  ,
+         ) %>% 
+  filter(year >2000, !is.na(mean_read_score))
 
-head(model_data, 50)
 
-model_data[complete.cases(model_data),]
 
-model1 <- lm(lit_rate ~ edu_spend + enrolment_rate + enrolment_ratio + 
-               out_of_school + early_ed + govt_exp_perc, model_data)
+
+model1 <- lm(mean_read_score ~ GDP_per_cap + early_ed_rate + lower_sec_enrolment_rate , model_data)
 summary(model1)
 ```
 
