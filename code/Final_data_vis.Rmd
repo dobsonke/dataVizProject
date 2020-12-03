@@ -9,7 +9,9 @@ knitr::opts_chunk$set(
   fig.width=8, 
   fig.height=7,
   fig.align = "center",
-  echo = TRUE
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE
 )
 ```
 
@@ -271,9 +273,11 @@ ggplot(data= third_vis_pivot) + geom_area(aes(x=time,y=rate,fill=index)) + geom_
 
 ```
 
+
 Before diving too much into details, let us recall a few facts and definitions :
-+ Primary school: Age 6 to 11
-+ Lower secondary school : Age 12 to 15
+
+* Primary school: Age 6 to 11
+* Lower secondary school : Age 12 to 15
 
 * Net enrolment rate in primary school : The number of pupils of official primary school age who are enrolled in primary education as a percentage of the total children of the official school age population
 
@@ -287,7 +291,7 @@ Before diving too much into details, let us recall a few facts and definitions :
 
 # PISA scores
 
-##Histogram
+## Histogram
 
 
 ```{r,warning=FALSE,message=FALSE,echo=FALSE}
@@ -384,9 +388,9 @@ ggplot(datavis_recent_dbl, aes(x= mean_per_subject,y=score,fill=is_morocco)) + g
 userBasedData_raw <- read.csv(file="Morocco.csv",header=TRUE,na.strings=c("..","NA"))
 ```
 
-The objective of this part of the code is to generate relevant map visualizations using R in combination with Tableau.
+> We also generated relevant map visualizations using R in combination with Tableau.
 
-The first question we want to explore is: how is Morocco's performance compared to the rest of the world's? Does Morocco perform well or badly? We will base our investigation on the average PISA scores ( as average, we consider the average of mathematics, science and reading scores).
+> We want to zoom on Morocco's performance and visualize the whole world in more details. We will base our investigation on the average PISA scores (as average, we consider the average of mathematics, science and reading scores).
 
 ```{r Morocco PISA plots}
 #Select relevant data for subsequent plots.
@@ -424,11 +428,11 @@ grid.raster(img0)
 
 ```
 
-On the map, we can see that Moroccans' average performance isn't good. As benchmarks against which we can compare Morocco's performance, we have highlighted worst and best performing countries, Dominican Republic and China, respectively. Morocco's average score is 367.9 compared to Dominican Republic's 334.1 and China's 579. 
+> On the map, we can see that Moroccans' average performance isn't good. As benchmarks against which we can compare Morocco's performance, we have highlighted worst and best performing countries, Dominican Republic and China, respectively. Morocco's average score is 367.9 compared to Dominican Republic's 334.1 and China's 579. Morocco was ranked 75th out of 78 countries to take the PISA test.
 
-After understanding Morocco's performance in comparison to the rest of the world, we want to further explore the variables that may contribute to the country's underperformance. Primary and secondary education are interesting variables to consider since people taking the PISA scores are young high school students (15  and 16 year old). 
+> After understanding Morocco's performance in comparison to the rest of the world, we want to further explore the variables that we assumed would contribute to the country's performance or underperformance. Primary and secondary education are interesting variables to consider since people taking the PISA scores are young high school students (15  and 16 year old). 
 
-Therefore, we're going to take a look at net enrolment in primary and secondary education and compare Morocco's numbers with the rest of the world's.
+> Therefore, we're going to zoom on net enrolment in primary and secondary education and compare Morocco's numbers with the rest of the world's.
 
 
 ```{r Morocco primary education,fig.height=10,fig.width=10}
@@ -457,7 +461,8 @@ img2<-readPNG('Net_Primary_Morocco1.png')
 grid.raster(img2)
 
 ```
-This map tells us how Morocco's net primary enrolment rate compares to other countries'. We can observe that Morocco has a high net primary enrolment rate, comparable to high-performing countries'. This indicates that the key to the Morocco's underperformance in PISA tests is not linked to primary education enrolment rates. Let's investigate net secondary enrolment rates!
+
+> This map tells us how Morocco's net primary enrolment rate compares to other countries'. We can observe that all high performing countries in PISA also have very high net primary enrolment rates. This confirms that the key to the Morocco's underperformance in PISA tests is not linked to primary education enrolment rates. Let's investigate net secondary enrolment rates!
 
 ```{r Morocco secondary education}
 #SECONDARY NET ENROLMENT 
@@ -483,13 +488,13 @@ primary_secondary <- primary_secondary_raw %>%
 img1<-readPNG('Net_Secondary_Morocco1.png')
 grid.raster(img1)
 ```
-On the map, we can observe the world countries' net secondary enrolment rate. Particularly, we can see that Morocco has a low net secondary enrolment rate of only 63.47%. Some other low-performing countries such as Dominican Republic and Panama also have low enrolment rates. In contrast, high-performing countries such as Canada and Finland have very high net secondary enrolment rates, close to 100%. 
 
-We can conclude that, unlike net primary enrolment rate, net secondary enrolment rate is generally different for high and low performing countries: countries that performed badly tend to have a significantly lower net secondary enrolment rate than countries that performed well. 
+> On the map, we can observe the world countries' net secondary enrolment rate. Particularly, we can see that Morocco has a low net secondary enrolment rate of only 63.47%. Some other low-performing countries such as Dominican Republic and Panama also have low enrolment rates. In contrast, high-performing countries such as Canada and Finland have very high net secondary enrolment rates, close to 100%. 
+
+> We can conclude that, unlike net primary enrolment rate, net secondary enrolment rate is generally different for high and low performing countries: countries that performed badly tend to have a significantly lower net secondary enrolment rate than countries that performed well. 
 
 
--- PROUD AND JIEYI -- 
-
+> So far, we have showed that youth literacy rate was high and that PISA scores were extremely low. Should Morocco be content of this achievement? How are other countries doing in terms of youth literacy rate?
 
 ```{r, warning = FALSE}
 data1 <- read.csv("dataviz_cleanname.csv")
@@ -503,7 +508,8 @@ data1$continent <- countrycode(sourcevar = data1$country,
 data1[6:146] <- lapply(data1[6:146], as.numeric)
 ```
 
-# Plot1
+# Youth literacy.. A real achievement?
+
 ```{r , warning=FALSE, fig.width=9}
 title <- "Beyond a GDP per capita of $2500, GDP is not a major driver of youth literacy"
 
@@ -562,7 +568,7 @@ young_lt_vs_gdp %>%
   theme(legend.position = "none")+
   
   
-   #add annodate for Morroco
+   #add annotate for Moroco
   geom_text(data = data.frame(x = 3500, y = 96, label = "Morocco"),
     aes(x = x, y = y, label = label),
     colour="red",
@@ -572,9 +578,111 @@ young_lt_vs_gdp %>%
     lineheight = .8,
     inherit.aes = FALSE)
 ```
-Unexpectedly, there isnt a 1-1 linear relationship between GDP per capita and Youth literacy rate. We can we see that there is a sharp increase in literacy rate when the GDP per capita increases up to $2500, this already leads to an almost 100% literacy rate already. We believe that this could be due to the easier accessibility to technology and learning materials, so it would be expected that there is a high youth literacy nowadays. Henceforth, youth literacy rate might not be a good indicator of overall literacy. 
 
-# Plot 2
+> Unexpectedly, there isnt a 1-1 linear relationship between GDP per capita and Youth literacy rate. We can we see that there is a sharp increase in literacy rate when the GDP per capita increases up to $2500, this already leads to an almost 100% literacy rate already. We believe that this could be due to the easier accessibility to technology and learning materials, so it would be expected that there is a high youth literacy nowadays. 
+
+> Even though we mentioned that Morocco had a very high youth literacy rate, this achievement might simply not be an indicator that the situation of the education system is good. Virtually all countries that crossed the threshold have a similar level of youth literacy rate, so Morocco should now really focus on improving real-life skills. But how can they do it? Is GDP per capita an important factor?
+
+# Factors to improve education
+
+## GDP per capita
+
+> Let us now visualize if GDP per capita really has an influence on PISA scores.
+
+```{r, fig.width = 10}
+
+data <- read.csv("Datavis1.csv") %>% 
+  janitor::clean_names()
+# head(data)#change name
+# colnames(data)[1] <- "country"
+# 
+# #select time
+# data1 <- data %>% 
+#   select(country:series_code,x2000_yr2000:x2020_yr2020)
+# 
+# #change names
+# colnames(data1)[5:25] <- c(2000:2020)
+# 
+# #pivot longer
+# data2 <- tidyr::pivot_longer(data1, cols = "2000":"2020", names_to = "Year", values_to = "count")
+
+#set the missing data as NA
+data[data == ".."] <- NA
+
+#add continent information
+# data2$continent <- countrycode(sourcevar = data2$country,
+#                                origin = "country.name",
+#                                destination = "continent")
+# #data2 taken from clean_data_1
+# data_clean <- data2 %>%
+#   filter(series != "") %>% 
+#     mutate(Year = as.integer(Year),
+#          count = as.double(count)) %>% 
+#     select(-series_code)
+
+```
+
+
+```{r}
+
+data_clean <- data %>% 
+  rename(country = country_name) %>% 
+  mutate(year = as.integer(time),
+         mean_read_score = as.integer(pisa_mean_performance_on_the_reading_scale_lo_pisa_rea),
+         GDP_per_cap = as.double(gdp_per_capita_current_us_ny_gdp_pcap_cd),
+         GDP_per_cap_PPP = as.double(gdp_per_capita_ppp_current_international_ny_gdp_pcap_pp_cd),
+         mean_sci_score = as.integer(pisa_mean_performance_on_the_science_scale_lo_pisa_sci),
+         mean_math_score = as.integer(pisa_mean_performance_on_the_mathematics_scale_lo_pisa_mat),
+         mean_score = (mean_math_score + mean_sci_score + mean_read_score)/3)
+
+pisa <- data_clean %>% 
+  filter(time == '2018', country != 'Kosovo', !is.na(mean_read_score)) %>% 
+  #only countries, with scores, Kosovo has no continent so remove the data
+  mutate(highlight = ifelse(country %in% c("China", "Luxembourg", "Morocco", "Vietnam"), TRUE, FALSE),
+         c_label = ifelse(country %in% c("China", "Luxembourg", "Morocco", "Vietnam"), country, ""))
+
+
+
+```
+
+```{r, fig.width = 10}
+
+ggplot(pisa, aes(x = GDP_per_cap, y = mean_score, colour = highlight, label = c_label)) + 
+  geom_point() +
+  ggrepel::geom_text_repel() +
+  labs(y = "Mean PISA Score", x = "GDP per Capita", 
+       title = "Money can help improve education but it's not the only factor",
+       subtitle = "China and Vietnam excel with low GDP per capita",
+       caption = "Source : worldbank.org/education") +
+  scale_colour_manual(values = c("grey","#C0392B")) +
+  theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
+      legend.title = element_text(family = "Oswald"),
+      legend.position = 'none',
+      plot.subtitle=element_text(size=17, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      axis.text.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
+      axis.title.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.title.y = element_text(size= 11,family = "Oswald",color="black"),
+      plot.title.position = "plot",
+      plot.caption.position = "plot",
+      panel.grid = element_blank(),
+      panel.background = element_rect(fill = 'white', colour = 'white'),
+      axis.ticks = element_blank())
+
+  
+
+
+```
+
+
+> Above we can see that while GDP per capita clearly plays a role in the PISA scores, it appears there are other factors that influence the outcome. We can see certain countries such as Vietnam (which has a similar GDP per capita to Morocco) has exceptional outcomes. The same is true for China which is highly successful given their GDP per capita. On the flipside we have Luxembourg who perform worse than almost all countries with over 35000 GDP per capita. It is clear there are other strong factors that play a role in the educational outcomes of each country.
+
+## Secondary school enrolment
+
+> Our map on net secondary enrolment showed that there could be a link between this factor and PISA scores. Let us visualize this relationship. 
+
+
 ```{r}
 # calculate pisa mean
 pisa_mean <- data1 %>% 
@@ -639,103 +747,225 @@ st_pisa %>%
 
 ```
 
-> When looking at PISA score and net enrollment for secondary education, Morocco is at the end of the spectrum when compared to the whole world. Secondary education seems to have much of a greater impact on the pupil's ability to do well in the PISA test - mathematics, science and reading abilities. Secondary school capabilities is directly related to the PISA score because the test takers are in the 15 year old range children. As a result, Morocco should have to try and boost their net enrollment rate in secondary education on the first stage to improvement in PISA scores. We decided to include the healthcare data into our report because we have realised that the country's healthcare system has an influence on students staying in school and going to school on a regular basis. It would be as simple as having vaccines for the influenza season because there has been a study saying that for every 100 children during flu season, which included 37 school days, an excess of 28 illness episodes and 63 missed school days occured. However, we can see that for Vietnam, they spend much less in healthcare which could be because, their neighbouring countries like Thailand and Phillipines has very good healthcare so they could just cross the border to access them. But for the case of Morocco, this does not exist. So looking at a similar country landscape like Belarus, to attend a higher PISA score like them, Morocco must improve their healthcare system.
+> When looking at PISA score and net enrollment for secondary education, Morocco is at the end of the spectrum when compared to the whole world. Secondary education seems to have much of a greater impact on the pupil's ability to do well in the PISA test - mathematics, science and reading abilities. Secondary school capabilities is directly related to the PISA score because the test takers are in the 15 year old range children. As a result, Morocco should have to try and boost their net enrollment rate in secondary education on the first stage to improvement in PISA scores. 
+
+## Overview on Vietnam
 
 
--- KEN -- 
-
-```{r, fig.width = 10}
-
-data <- read.csv("Datavis.csv") %>% 
+```{r data cleaning}
+data <- read.csv("Data visualization final data.csv") %>% # download file
   janitor::clean_names()
-# head(data)#change name
-# colnames(data)[1] <- "country"
-# 
-# #select time
-# data1 <- data %>% 
-#   select(country:series_code,x2000_yr2000:x2020_yr2020)
-# 
-# #change names
-# colnames(data1)[5:25] <- c(2000:2020)
-# 
-# #pivot longer
-# data2 <- tidyr::pivot_longer(data1, cols = "2000":"2020", names_to = "Year", values_to = "count")
+
+healthcare<- read_csv("healthcare.csv", #download file
+           na = "***") %>% 
+  janitor::clean_names()
+
+#cleaning the data
+#change name
+colnames(data)[1] <- "country"
+
+#select time
+data1 <- data %>% 
+  select(country:series_code,x2000_yr2000:x2020_yr2020)
+
+#change names
+colnames(data1)[5:25] <- c(2000:2020)
+
+#pivot longer
+data2 <- tidyr::pivot_longer(data1, cols = "2000":"2020", names_to = "Year", values_to = "count")
 
 #set the missing data as NA
-data[data == ".."] <- NA
+data2[data2 == ".."] <- NA
 
 #add continent information
-# data2$continent <- countrycode(sourcevar = data2$country,
-#                                origin = "country.name",
-#                                destination = "continent")
-# #data2 taken from clean_data_1
-# data_clean <- data2 %>%
-#   filter(series != "") %>% 
-#     mutate(Year = as.integer(Year),
-#          count = as.double(count)) %>% 
-#     select(-series_code)
+data2$continent <- countrycode(sourcevar = data2$country,
+                               origin = "country.name",
+                               destination = "continent")
 
 ```
 
 ```{r}
+#cleaning the healthcare dataset
+healthcare <- healthcare %>% 
+  select(series_name, country_name, x2011_yr2011:x2020_yr2020)
 
-data_clean <- data %>% 
-  rename(country = i_country_name) %>% 
-  mutate(year = as.integer(time),
-         mean_read_score = as.integer(pisa_mean_performance_on_the_reading_scale_lo_pisa_rea),
-         GDP_per_cap = as.double(gdp_per_capita_current_us_ny_gdp_pcap_cd),
-         GDP_per_cap_PPP = as.double(gdp_per_capita_ppp_current_international_ny_gdp_pcap_pp_cd),
-         mean_sci_score = as.integer(pisa_mean_performance_on_the_science_scale_lo_pisa_sci),
-         mean_math_score = as.integer(pisa_mean_performance_on_the_mathematics_scale_lo_pisa_mat),
-         mean_score = (mean_math_score + mean_sci_score + mean_read_score)/3)
-
-pisa <- data_clean %>% 
-  filter(time == '2018', country != 'Kosovo', !is.na(mean_read_score)) %>% 
-  #only countries, with scores, Kosovo has no continent so remove the data
-  mutate(highlight = ifelse(country %in% c("China", "Luxembourg", "Morocco", "Vietnam"), TRUE, FALSE),
-         c_label = ifelse(country %in% c("China", "Luxembourg", "Morocco", "Vietnam"), country, ""))
+  colnames(healthcare)[3:12] <- c(2011:2020)
+  
+  healthcare <- tidyr::pivot_longer(healthcare, cols = "2011":"2020", names_to = "Year", values_to = "count")
+  healthcare[healthcare == ".."] <- NA
+```
 
 
 
+```{r}
+#creating the PISA mean score
+pisa_mean <- data2 %>%
+  filter(series == "PISA: Mean performance on the science scale" |
+           series == "PISA: Mean performance on the reading scale"|
+           series == "PISA: Mean performance on the mathematics scale")%>%
+  pivot_wider(names_from= series, values_from= count) %>% 
+janitor::clean_names()
+
+pisa_mean$year <- as.numeric(pisa_mean$year)
+pisa_mean$pisa_mean_performance_on_the_science_scale <- as.numeric(pisa_mean$pisa_mean_performance_on_the_science_scale)
+pisa_mean$pisa_mean_performance_on_the_reading_scale <- as.numeric(pisa_mean$pisa_mean_performance_on_the_reading_scale)
+pisa_mean$pisa_mean_performance_on_the_mathematics_scale <- as.numeric(pisa_mean$pisa_mean_performance_on_the_mathematics_scale)
+
+pisa_mean1 <- pisa_mean %>% 
+  select(country, year, continent, pisa_mean_performance_on_the_science_scale)
+
+pisa_mean2 <- pisa_mean %>% 
+  select(country, year, continent, pisa_mean_performance_on_the_reading_scale)
+
+pisa_meansciread <- left_join(pisa_mean1, pisa_mean2) %>% 
+  filter(!is.na(pisa_mean_performance_on_the_science_scale)) %>%
+  filter(!is.na(pisa_mean_performance_on_the_reading_scale))
+
+pisa_mean3<- pisa_mean %>% 
+  select(country, year, continent, pisa_mean_performance_on_the_mathematics_scale)
+
+pisa_mean_all <- left_join(pisa_meansciread, pisa_mean3) %>% #creating one file which contains the pisa mean scores for all tests
+  filter(!is.na(pisa_mean_performance_on_the_mathematics_scale)) %>% 
+  group_by(country, year, continent) %>% #calculating the mean score for pisa
+  mutate(mean_score = sum(pisa_mean_performance_on_the_reading_scale,
+                              pisa_mean_performance_on_the_mathematics_scale,
+                              pisa_mean_performance_on_the_science_scale)/3) %>% 
+  filter(!is.na(mean_score)) %>% 
+  select(country,year,mean_score)
+```
+
+
+```{r}
+#calculating the government expenditure on secondary education PER CAPITA
+secondary_expend<- data2 %>% 
+  filter(series == "Government expenditure on secondary education, US$ (millions)" |
+           series == "Population, total") %>% 
+  filter(!is.na(count)) %>% 
+  filter(!is.na(continent)) %>% 
+   pivot_wider(names_from = series, values_from = count) %>% 
+  janitor::clean_names() 
+  
+secondary_expend$population_total <- as.numeric(secondary_expend$population_total)
+secondary_expend$government_expenditure_on_secondary_education_us_millions <- as.numeric(secondary_expend$government_expenditure_on_secondary_education_us_millions)
+secondary_expend$year <- as.numeric(secondary_expend$year)
+
+data2.1 <- secondary_expend %>% 
+  select(country, year, government_expenditure_on_secondary_education_us_millions)
+
+data2.2 <- secondary_expend %>% 
+  select(country, year, population_total )
+
+secondary_expend<- left_join(data2.1, data2.2) %>% #combine the file to get relevant columns
+  filter(!is.na(government_expenditure_on_secondary_education_us_millions)) %>% 
+  filter(!is.na(population_total)) %>% #calculate the government expenditure on secondary education PER CAPITA, so that when we compare between the other variables they are all 'per capita'
+  mutate(government_expenditure_on_secondary_education_per_capita = government_expenditure_on_secondary_education_us_millions*1000000 / population_total ) %>% 
+  select(country,year,government_expenditure_on_secondary_education_per_capita )
 
 ```
 
-```{r, fig.width = 10}
+```{r}
+#getting the per healthcare dataset <- healthy country go to school
 
-ggplot(pisa, aes(x = GDP_per_cap, y = mean_score, colour = highlight, label = c_label)) + 
-  geom_point() +
-  ggrepel::geom_text_repel() +
-  labs(y = "Mean PISA Score", x = "GDP per Capita", 
-       title = "Money can help improve education but it's not the only factor",
-       subtitle = "China and Vietnam excel with low GDP per capita",
-       caption = "Source : worldbank.org/education") +
-  scale_colour_manual(values = c("grey","#C0392B")) +
-  theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
-      legend.title = element_text(family = "Oswald"),
-      legend.position = 'none',
-      plot.subtitle=element_text(size=17, family = "Oswald"),
-      plot.caption = element_text(size=9 , family = "Oswald"),
-      axis.text.x = element_text(size= 11, family='Oswald',color="black"),
-      axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
-      axis.title.x = element_text(size= 11, family='Oswald',color="black"),
-      axis.title.y = element_text(size= 11,family = "Oswald",color="black"),
-      plot.title.position = "plot",
-      plot.caption.position = "plot",
-      panel.grid = element_blank(),
-      panel.background = element_rect(fill = 'white', colour = 'white'),
-      axis.ticks = element_blank())
+health_expend <- healthcare %>% #combining the findings
+  filter(!is.na(count)) %>% 
+  mutate(current_health_expenditure_per_capita_current_us = count, 
+         country = country_name) %>% 
+  select(country,Year, current_health_expenditure_per_capita_current_us ) %>% 
+  janitor::clean_names() 
 
+health_expend$current_health_expenditure_per_capita_current_us <- as.numeric(health_expend$current_health_expenditure_per_capita_current_us)
+health_expend$year <- as.numeric(health_expend$year)
+
+```
+
+```{r }
+#combining healthcare/capita, government per capita, pisa score together, gdp per capita
+
+combine1<- left_join(health_expend, secondary_expend) %>% 
+  filter(!is.na(government_expenditure_on_secondary_education_per_capita)) %>% 
+group_by(country) %>% 
+  slice_max(order_by = year) 
+
+gdp_data <- data2 %>% 
+  filter(series == "GDP per capita (current US$)") %>% 
+  filter(!is.na(count)) %>% 
+  filter(!is.na(continent)) %>% 
+   pivot_wider(names_from = series, values_from = count) %>% 
+  janitor::clean_names() 
+
+gdp_data1 <- gdp_data %>% 
+  group_by(country) %>% 
+  slice_max(order_by = year, n = 1) %>% 
+  select(!country_code) %>% 
+  select(!series_code)
+
+pisa_mean_new <- pisa_mean_all %>% #only filter for the latest year pisa score
+  filter(year == "2018")
+
+combine2 <- pisa_mean_new %>% 
+  left_join(gdp_data1, by = c("country" = "country")) %>% 
+  left_join(combine1, by = c("country" = "country")) %>% 
+  select(country, mean_score, gdp_per_capita_current_us, current_health_expenditure_per_capita_current_us, government_expenditure_on_secondary_education_per_capita) %>% 
+filter(!is.na(government_expenditure_on_secondary_education_per_capita)) %>%
+filter(!is.na(current_health_expenditure_per_capita_current_us)) 
+
+combine2$gdp_per_capita_current_us <- as.numeric(combine2$gdp_per_capita_current_us)
+
+combine3<- combine2 %>% #filter out 10 countries that have similar gdp to Morocco to understand whether healthcare and spending on secondary affects the pisa score
+  filter(2000< gdp_per_capita_current_us) %>% 
+  filter(gdp_per_capita_current_us<6700) %>% 
+  select(country, mean_score,current_health_expenditure_per_capita_current_us, government_expenditure_on_secondary_education_per_capita )
+  
+groupedbar <- combine3 %>% #pivot to create a ggplot
+  pivot_longer(cols= 3:4, names_to= "Series", values_to= "value") %>% 
+  group_by(Series)
+
+```
+
+```{r, warning= FALSE}
+#graph creation
+groupedbar %>% 
+
+  ggplot(aes(x=country, y= mean_score,lty = "Mean PISA score", group = 1), fill = "darkgrey")+
+  geom_bar(aes(x = country, y = value, fill = Series, group = Series), stat="identity", position="dodge") +
+  geom_line(color = "darkgrey", size = 1.25)+
+  geom_point()+
+  geom_rect(aes(xmin = 9.5, xmax = 10.5, ymin = 0, ymax = 550), color = 'darkblue', linetype = "dashed", alpha = 0)+
+  
+  
+  scale_y_continuous(breaks=seq(0,550,by=100), limits=c(0,600)) +
+  scale_fill_manual(name="", labels = c("Health expenditure per capita","Secondary education expenditure \nper capita"),values = c("lightblue","pink"))+
   
 
+  scale_colour_discrete(labels = c("Mean PISA score"))+
+  
+  labs(title = "Size isn't everything - Vietnam outperforms in PISA scores",
+       subtitle = "Comparison of similar GDP countries in terms of education/health expenditure",
+       x = "Country", y = "Expenditure")+
+  theme_minimal()+
+
+  
+  theme(plot.title = element_text(face = "bold", size = 18, family = "Oswald"),
+      plot.subtitle=element_text(size=15, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      axis.text.x = element_text(size= 8, family='Oswald',color="black",angle = 20, vjust = 1),
+      axis.text.y = element_text(size= 9,family = "Oswald",color="black"),
+      axis.title.x = element_text(size= 11, family='Oswald'),
+      axis.title.y = element_text(size= 11, family='Oswald'),
+      plot.title.position = "plot",
+      legend.text = element_text(size = 8, family = "Oswald"),
+      legend.title = element_blank())
 
 ```
 
+> As mentioned earlier, Vietnam has performed very well despite a low GDP per capita.We also decided to include the healthcare data into our report because we have realised that the country's healthcare system has an influence on students staying in school and going to school on a regular basis. It would be as simple as having vaccines for the influenza season because there has been a study saying that for every 100 children during flu season, which included 37 school days, an excess of 28 illness episodes and 63 missed school days occured. However, we  see that this does not apply to Vietnam, which they spend much less in healthcare. This could be because neighbouring countries such as Thailand and Phillipines have very good healthcare and share medical knowledge/resources with them. This does not apply to Morocco, so we looked at a similar country landscape like Belarus, and concluded that reaching a higher PISA score might also involve  improving our healthcare system. 
 
+> As a last step, we contacted the ministry of education and asked them what was their strategy for the next 20 years. The minister indicated that Morocco would focus on early education (kindergarten) and lower secondary education. He asked us to check if this strategy made sense from a statistical point of view, so we ran a regression : average PISA scores ~ GDP per capita, lower secondary enrolment rate and early education enrolment rate.
 
-> Above we can see that while GDP per capita clearly plays a role in the PISA scores, it appears there are other factors that influence the outcome. We can see certain countries such as Vietnam (which has a similar GDP per capita to Morocco) has exceptional outcomes. The same is true for China which is highly successful given their GDP per capita. On the flipside we have Luxembourg who perform worse than almost all countries with over 35000 GDP per capita. It is clear there are other strong factors that play a role in the educational outcomes of each country.
 
 ```{r pressure, echo=FALSE}
-#These are horrible variables so tried to name them something reasonable
+
+#Regression model
 model_data <- data_clean %>% 
   mutate(lit_rate = as.double(adult_literacy_rate_population_15_years_both_sexes_se_adt_litr_zs),
          pri_enrolment_rate = as.double(net_enrolment_rate_primary_both_sexes_se_prm_nenr),
@@ -763,5 +993,13 @@ model1 <- lm(mean_read_score ~ GDP_per_cap + early_ed_rate + lower_sec_enrolment
 summary(model1)
 ```
 
+> The result was very convincing : all variables were significant. Thus, we believe that even though GDP per capita is an important factor, Vietnam has shown that it was not the only possible way to improve PISA scores. We just proved that lower secondary enrolment rate and early education enrolment rate were very important variables too. Basically, Morocco needs to find a way to teach sooner (early education) or to teach longer (secondary education).
 
-  
+> Rome wasn't built in a day, but the country needs to set a data-driven strategy for the next 20 years in order to monitor educational reforms and improve the system. We proved that GDP is not the only factor that counts, and that the country's strategy should primarily focus on early education and lower-secondary education for the future of the country.
+
+> Thank you for reading our project, and as a final word... 
+
+![](keep calm.jpg "keep calm.jpg")
+
+![](moroccan tea.png "moroccan tea.jpg")
+
