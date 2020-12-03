@@ -1,5 +1,8 @@
 # dataVizProject
 
+**files are unorganized: pleast note the final product can be found at  code/Final_data_vis.Rmd**
+
+
 Data visualization notes:AM10 Data Visualization | Study Group 2
 
 **EDUCATION**. The   data   we   will   analyze   can   be   found   on:https://databank.worldbank.org/source/education-statistics-%5E-all-indicators We want to analyze the educational system in Morocco.  For this, we wouldlike to understand the current state of the Moroccan educational system andto uncover some insights about it. This will require us to use economic,demographic and educational data in Morocco and in other countries as amatter of comparison.
