@@ -20,6 +20,9 @@ library(janitor)
 library(ggthemes)
 library(lubridate)
 library(readr)
+library(dplyr)
+library(writexl)
+library(readxl)
 
 ```
 
@@ -28,30 +31,111 @@ library(readr)
 dataset_base <- read_csv("Data visualization final data.csv")
 dataset_base <- clean_names(dataset_base)
 
+dataset_othy <- read_csv("Datavis.csv")
+
 dataset_clean1 <- dataset_base %>% 
   select(!x1970_yr1970:x1999_yr1999) %>% 
-  select(!x2025_yr2025:x2100_yr2100)
+  select(!x2025_yr2025:x2100_yr2100) 
 
 #remove not needed dataset
 remove(dataset_base)
 
 dataset_morocco <- dataset_clean1 %>% 
-  filter(country_name == "Morocco")
+  filter(country_name == "Morocco") %>% 
+  rename("2000" = x2000_yr2000,
+         "2001" = x2001_yr2001,
+         "2002" = x2002_yr2002,
+         "2003" = x2003_yr2003,
+         "2004" = x2004_yr2004,
+         "2005" = x2005_yr2005,
+         "2006" = x2006_yr2006,
+         "2007" = x2007_yr2007,
+         "2008" = x2008_yr2008,
+         "2009" = x2009_yr2009,
+         "2010" = x2010_yr2010,
+         "2011" = x2011_yr2011,
+         "2012" = x2012_yr2012,
+         "2013" = x2013_yr2013,
+         "2014" = x2014_yr2014,
+         "2015" = x2015_yr2015, 
+         "2016" = x2016_yr2016,
+         "2017" = x2017_yr2017, 
+         "2018" = x2018_yr2018, 
+         "2019" = x2019_yr2019, 
+         "2020" = x2020_yr2020) %>% 
+  select(!"2020") %>% 
+  select(!"2019") %>% 
+  filter(series == "GDP per capita (current US$)" |
+         series == 	"Enrolment in primary education, both sexes (number)" |
+         series == "Enrolment in secondary education, both sexes (number)" |
+         series_code == "SE.TER.ENRL" |
+         series_code == "SE.ADT.1524.LT.ZS" |
+         series_code == "SE.ADT.LITR.ZS" |
+         series_code == "UIS.X.US.1.FSGOV" |
+         series_code == "UIS.X.US.2T3.FSGOV")
 
+#write_xlsx(dataset_morocco,"morocco_subset1.xlsx")
+# write_xlsx(cleaned_index_piv, "morocco_final_subset_pivot.xlsx")
+cleaned_index <- read_excel("morocco_subset_cleaned_index.xlsx")
+cleaned_index2 <- read_excel("morocco_final_subset_pivot.xlsx")
 ```
 
 # Creating data subsets 
 
-```{r data_manipulation, warning=FALSE}
+```{r data_manipulation, warning=FALSE, fig.width = 10}
+
+cleaned_index_piv <- cleaned_index %>% 
+  pivot_longer("2000":"2018", names_to = "year", values_to = "index")
+
+plot1 <- cleaned_index_piv %>% 
+  filter(series_code == "NY.GDP.PCAP.CD" |
+         series_code == "UIS.X.US.2T3.FSGOV" |
+         series_code == "UIS.X.US.1.FSGOV") %>% 
+  ggplot(aes(x=year, y=as.numeric(index), colour=series, group=series))+
+  geom_line(stat="identity") +
+  geom_point()
+
+plot1
+#glimpse(cleaned_index_piv)
 
 
+```
+
+```{r, fig.width=10}
+
+cleaned_index2 %>% 
+  filter(series_code == "NY.GDP.PCAP.CD" |
+         series_code == "UIS.X.US.2T3.FSGOV" |
+         series_code == "UIS.X.US.1.FSGOV" |
+         series_code == "perc_of_gdp_secondary" |
+         series_code == "perc_of_gdp_primary") %>%
+  filter(year <= 2013) %>% 
+  ggplot(aes(x=year, y=index, colour=series, group=series)) +
+  geom_line() +
+  geom_point() +
+  labs(title="Morocco strongly increased investments in education since 2000 - exceeding GDP growth",
+       subtitle="Indexed education expenditure vs. GDP in Morocco (2000-2013)",
+       caption="Source: World Bank\n Note: Indexed based on 2000, assumed linear progression for missing data in between years",
+       x = element_blank(),
+       y = element_blank()) +
+  theme_minimal() +
+  theme()
+
+# Align caption
+# Adjust legend
+# Bold title
+# Change colours
+
+
+```
+
+```{r}
 
 
 
 
 
 ```
-
 
 
 

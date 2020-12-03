@@ -1,0 +1,176 @@
+---
+title: "Youth Literacy vs GDP per capita"
+author: "Jieyi Cai"
+date: "2020/12/2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r ,include=FALSE}
+library(tidyverse)
+library(extrafont)
+library(ggtext)
+library(janitor)
+library(ggthemes)
+library(dplyr)
+library(countrycode)
+library(ggplot2)
+loadfonts(device="win")
+```
+
+```{r, warning = FALSE}
+data1 <- read.csv("morocco_additional_data\\dataviz_cleanname.csv")
+
+# add continent information
+data1$continent <- countrycode(sourcevar = data1$country,
+                               origin = "country.name",
+                               destination = "continent")
+
+# change variables types to numeric
+data1[6:146] <- lapply(data1[6:146], as.numeric)
+```
+
+# Plot1
+```{r , warning=FALSE, fig.width=9}
+title <- "Beyond a GDP per capita of $2500, GDP is not a major driver of youth literacy"
+
+# create clean data for youth literacy rate and gdp
+young_lt_vs_gdp <- data1 %>% 
+  select(country,time,
+         youth_literacy_rate_population_15_24_years_both_sexes_se_adt_1524_lt_zs,
+         gdp_per_capita_current_us_ny_gdp_pcap_cd) %>% 
+  # delete missing values
+  filter(youth_literacy_rate_population_15_24_years_both_sexes_se_adt_1524_lt_zs != "..") %>% 
+  # use the latest number for each country
+  group_by(country) %>% 
+  slice_max(order_by = time, n = 1) %>% 
+  # Some of the latest number are before 2010, delete them
+  filter(time > 2010) %>% 
+  # set arrange for GDP per capita
+  filter(gdp_per_capita_current_us_ny_gdp_pcap_cd > 1000 &
+         gdp_per_capita_current_us_ny_gdp_pcap_cd < 30000) %>% 
+  # create new variables to point Morocco out
+  mutate(Morocco_or_not = case_when(
+    country == "Morocco" ~ "Y",
+    TRUE ~ "N"))
+
+
+#create a plot
+young_lt_vs_gdp %>% 
+  ggplot(aes(x = gdp_per_capita_current_us_ny_gdp_pcap_cd, 
+             y = youth_literacy_rate_population_15_24_years_both_sexes_se_adt_1524_lt_zs, color = Morocco_or_not))+
+  geom_point(stat = "identity") +
+  # add a vline to emphasize our idea
+  geom_vline(xintercept = 2560, linetype = "dashed", color = "Orange", size = 1)+
+  
+  scale_x_continuous(breaks=seq(0,20000,by=5000), limits=c(0,15000)) +
+  
+  
+  #add titles and subtitles
+  labs(title = title,
+       subtitle = "Scatterplot of youth literacy rate against GDP per capita",
+       x = "GDP per capita", 
+       y = "Youth Literacy Rate",
+       caption = "Data source: Worldbank.org/education")+
+  theme_minimal()+
+  
+  
+  #set fonts and sizes for every text
+  theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
+      plot.subtitle=element_text(size=17, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      legend.position= "none",
+      axis.text.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
+      axis.title.x = element_text(size= 11, family='Oswald'),
+      axis.title.y = element_text(size= 11, family='Oswald'),
+      plot.title.position = "plot")+
+  scale_color_manual(values = c("grey","red")) +
+  theme(legend.position = "none")+
+  
+  
+   #add annodate for Morroco
+  geom_text(data = data.frame(x = 3500, y = 96, label = "Morocco"),
+    aes(x = x, y = y, label = label),
+    colour="red",
+    family="Oswald",
+    size = 4,
+    hjust = 0.5,
+    lineheight = .8,
+    inherit.aes = FALSE)
+```
+Unexpectedly, there isnt a 1-1 linear relationship between GDP per capita and Youth literacy rate. We can we see that there is a sharp increase in literacy rate when the GDP per capita increases up to $2500, this already leads to an almost 100% literacy rate already. We believe that this could be due to the easier accessibility to technology and learning materials, so it would be expected that there is a high youth literacy nowadays. Henceforth, youth literacy rate might not be a good indicator of overall literacy. 
+
+# Plot 2
+```{r}
+# calculate pisa mean
+pisa_mean <- data1 %>% 
+  select(country, time,
+         pisa_mean_performance_on_the_mathematics_scale_lo_pisa_mat,
+         pisa_mean_performance_on_the_reading_scale_lo_pisa_rea,
+         pisa_mean_performance_on_the_science_scale_lo_pisa_sci) %>% 
+  group_by(country, time) %>% 
+  mutate(mean_score = sum(pisa_mean_performance_on_the_reading_scale_lo_pisa_rea,
+                              pisa_mean_performance_on_the_mathematics_scale_lo_pisa_mat,
+                              pisa_mean_performance_on_the_science_scale_lo_pisa_sci)/3) %>% 
+  filter(!is.na(mean_score)) %>% 
+  select(country,time,mean_score) %>% 
+  group_by(country) %>% 
+  slice_max(order_by = time, n = 1)
+
+# process the net enrolment rate data
+ST_ratio <- data1 %>% 
+  select(country, time,
+         net_enrolment_rate_lower_secondary_both_sexes_uis_ner_2) %>% 
+  filter(!is.na(net_enrolment_rate_lower_secondary_both_sexes_uis_ner_2))%>% 
+  group_by(country) %>% 
+  slice_max(order_by = time, n = 1)
+
+# join two chart together
+st_pisa <- pisa_mean %>% 
+  left_join(ST_ratio, by = c("country" = "country")) %>% 
+  filter(!is.na(net_enrolment_rate_lower_secondary_both_sexes_uis_ner_2)) %>% 
+  mutate(Morocco = case_when(
+    country == "Morocco" ~ "Y",
+    TRUE ~ "N"
+  ))
+```
+
+
+```{r , warning=FALSE, fig.width=9}
+# create the plot
+st_pisa %>% 
+  ggplot(aes(x = net_enrolment_rate_lower_secondary_both_sexes_uis_ner_2,
+             y = mean_score, color = Morocco))+
+  geom_point()+
+  geom_smooth(method="lm",se=FALSE, color = "darkblue")+
+  annotate("text",x = 60, y = 385, label = "Morocco", color = "red", font = "Oswald" )+
+  theme_minimal()+
+  
+  labs(title = "Only if students go to school they can actually become more educated",
+       subtitle = "PISA scores as a means of secondary education enrollment",
+    y = "Mean PISA Score", x = "Net Enrolment Rate for Secondary Education",
+    caption = "\nNote: Net Enrollment Rate = DEFINITION \n\nData source: Worldbank.org/education")+
+  
+  theme(plot.title = element_text(face = "bold", size = 19, family = "Oswald"),
+      plot.subtitle=element_text(size=17, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      legend.position= "none",
+      axis.text.x = element_text(size= 11, family='Oswald',color="black"),
+      axis.text.y = element_text(size= 11,family = "Oswald",color="black"),
+      axis.title.x = element_text(size= 11, family='Oswald'),
+      axis.title.y = element_text(size= 11, family='Oswald'),
+      plot.title.position = "plot")+
+  scale_color_manual(values = c("grey","red")) +
+  theme(legend.position = "none")
+
+```
+
+When looking at PISA score and net enrollment for secondary education, Morocco is at the end of the spectrum when compared to the whole world. Secondary education seems to have much of a greater impact on the pupil's ability to do well in the PISA test - mathematics, science and reading abilities. Secondary school capabilities is directly related to the PISA score because the test takers are in the 15 year old range children. As a result, Morocco should have to try and boost their net enrollment rate in secondary education on the first stage to improvement in PISA scores. 
+
+
+
+

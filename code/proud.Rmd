@@ -1,0 +1,239 @@
+---
+title: "Data Visualization Group Project"
+author: "pck"
+date: "2020/11/30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars,  include=FALSE}
+library(tidyverse)
+library(extrafont)
+library(ggtext)
+library(janitor)
+library(ggthemes)
+library(dplyr)
+library(countrycode)
+library(ggplot2)
+```
+
+## Clean Data
+
+```{r data cleaning}
+data <- read.csv("Data visualization final data.csv") %>% # download file
+  janitor::clean_names()
+
+healthcare<- read_csv("healthcare.csv", #download file
+           na = "***") %>% 
+  janitor::clean_names()
+
+#cleaning the data
+#change name
+colnames(data)[1] <- "country"
+
+#select time
+data1 <- data %>% 
+  select(country:series_code,x2000_yr2000:x2020_yr2020)
+
+#change names
+colnames(data1)[5:25] <- c(2000:2020)
+
+#pivot longer
+data2 <- tidyr::pivot_longer(data1, cols = "2000":"2020", names_to = "Year", values_to = "count")
+
+#set the missing data as NA
+data2[data2 == ".."] <- NA
+
+#add continent information
+data2$continent <- countrycode(sourcevar = data2$country,
+                               origin = "country.name",
+                               destination = "continent")
+
+```
+
+
+```{r}
+#cleaning the healthcare dataset
+healthcare <- healthcare %>% 
+  select(series_name, country_name, x2011_yr2011:x2020_yr2020)
+
+  colnames(healthcare)[3:12] <- c(2011:2020)
+  
+  healthcare <- tidyr::pivot_longer(healthcare, cols = "2011":"2020", names_to = "Year", values_to = "count")
+  healthcare[healthcare == ".."] <- NA
+```
+
+# Plot1
+
+```{r}
+#creating the PISA mean score
+pisa_mean <- data2 %>%
+  filter(series == "PISA: Mean performance on the science scale" |
+           series == "PISA: Mean performance on the reading scale"|
+           series == "PISA: Mean performance on the mathematics scale")%>%
+  pivot_wider(names_from= series, values_from= count) %>% 
+janitor::clean_names()
+
+pisa_mean$year <- as.numeric(pisa_mean$year)
+pisa_mean$pisa_mean_performance_on_the_science_scale <- as.numeric(pisa_mean$pisa_mean_performance_on_the_science_scale)
+pisa_mean$pisa_mean_performance_on_the_reading_scale <- as.numeric(pisa_mean$pisa_mean_performance_on_the_reading_scale)
+pisa_mean$pisa_mean_performance_on_the_mathematics_scale <- as.numeric(pisa_mean$pisa_mean_performance_on_the_mathematics_scale)
+
+pisa_mean1 <- pisa_mean %>% 
+  select(country, year, continent, pisa_mean_performance_on_the_science_scale)
+
+pisa_mean2 <- pisa_mean %>% 
+  select(country, year, continent, pisa_mean_performance_on_the_reading_scale)
+
+pisa_meansciread <- left_join(pisa_mean1, pisa_mean2) %>% 
+  filter(!is.na(pisa_mean_performance_on_the_science_scale)) %>%
+  filter(!is.na(pisa_mean_performance_on_the_reading_scale))
+
+pisa_mean3<- pisa_mean %>% 
+  select(country, year, continent, pisa_mean_performance_on_the_mathematics_scale)
+
+pisa_mean_all <- left_join(pisa_meansciread, pisa_mean3) %>% #creating one file which contains the pisa mean scores for all tests
+  filter(!is.na(pisa_mean_performance_on_the_mathematics_scale)) %>% 
+  group_by(country, year, continent) %>% #calculating the mean score for pisa
+  mutate(mean_score = sum(pisa_mean_performance_on_the_reading_scale,
+                              pisa_mean_performance_on_the_mathematics_scale,
+                              pisa_mean_performance_on_the_science_scale)/3) %>% 
+  filter(!is.na(mean_score)) %>% 
+  select(country,year,mean_score)
+```
+
+
+```{r}
+#calculating the government expenditure on secondary education PER CAPITA
+secondary_expend<- data2 %>% 
+  filter(series == "Government expenditure on secondary education, US$ (millions)" |
+           series == "Population, total") %>% 
+  filter(!is.na(count)) %>% 
+  filter(!is.na(continent)) %>% 
+   pivot_wider(names_from = series, values_from = count) %>% 
+  janitor::clean_names() 
+  
+secondary_expend$population_total <- as.numeric(secondary_expend$population_total)
+secondary_expend$government_expenditure_on_secondary_education_us_millions <- as.numeric(secondary_expend$government_expenditure_on_secondary_education_us_millions)
+secondary_expend$year <- as.numeric(secondary_expend$year)
+
+data2.1 <- secondary_expend %>% 
+  select(country, year, government_expenditure_on_secondary_education_us_millions)
+
+data2.2 <- secondary_expend %>% 
+  select(country, year, population_total )
+
+secondary_expend<- left_join(data2.1, data2.2) %>% #combine the file to get relevant columns
+  filter(!is.na(government_expenditure_on_secondary_education_us_millions)) %>% 
+  filter(!is.na(population_total)) %>% #calculate the government expenditure on secondary education PER CAPITA, so that when we compare between the other variables they are all 'per capita'
+  mutate(government_expenditure_on_secondary_education_per_capita = government_expenditure_on_secondary_education_us_millions*1000000 / population_total ) %>% 
+  select(country,year,government_expenditure_on_secondary_education_per_capita )
+
+```
+
+```{r}
+#getting the per healthcare dataset <- healthy country go to school
+
+health_expend <- healthcare %>% #combining the findings
+  filter(!is.na(count)) %>% 
+  mutate(current_health_expenditure_per_capita_current_us = count, 
+         country = country_name) %>% 
+  select(country,Year, current_health_expenditure_per_capita_current_us ) %>% 
+  janitor::clean_names() 
+
+health_expend$current_health_expenditure_per_capita_current_us <- as.numeric(health_expend$current_health_expenditure_per_capita_current_us)
+health_expend$year <- as.numeric(health_expend$year)
+
+```
+
+```{r }
+#combining healthcare/capita, government per capita, pisa score together, gdp per capita
+
+combine1<- left_join(health_expend, secondary_expend) %>% 
+  filter(!is.na(government_expenditure_on_secondary_education_per_capita)) %>% 
+group_by(country) %>% 
+  slice_max(order_by = year) 
+
+gdp_data <- data2 %>% 
+  filter(series == "GDP per capita (current US$)") %>% 
+  filter(!is.na(count)) %>% 
+  filter(!is.na(continent)) %>% 
+   pivot_wider(names_from = series, values_from = count) %>% 
+  janitor::clean_names() 
+
+gdp_data1 <- gdp_data %>% 
+  group_by(country) %>% 
+  slice_max(order_by = year, n = 1) %>% 
+  select(!country_code) %>% 
+  select(!series_code)
+
+pisa_mean_new <- pisa_mean_all %>% #only filter for the latest year pisa score
+  filter(year == "2018")
+
+combine2 <- pisa_mean_new %>% 
+  left_join(gdp_data1, by = c("country" = "country")) %>% 
+  left_join(combine1, by = c("country" = "country")) %>% 
+  select(country, mean_score, gdp_per_capita_current_us, current_health_expenditure_per_capita_current_us, government_expenditure_on_secondary_education_per_capita) %>% 
+filter(!is.na(government_expenditure_on_secondary_education_per_capita)) %>%
+filter(!is.na(current_health_expenditure_per_capita_current_us)) 
+
+combine2$gdp_per_capita_current_us <- as.numeric(combine2$gdp_per_capita_current_us)
+
+combine3<- combine2 %>% #filter out 10 countries that have similar gdp to Morocco to understand whether healthcare and spending on secondary affects the pisa score
+  filter(2000< gdp_per_capita_current_us) %>% 
+  filter(gdp_per_capita_current_us<6700) %>% 
+  select(country, mean_score,current_health_expenditure_per_capita_current_us, government_expenditure_on_secondary_education_per_capita )
+  
+groupedbar <- combine3 %>% #pivot to create a ggplot
+  pivot_longer(cols= 3:4, names_to= "Series", values_to= "value") %>% 
+  group_by(Series)
+
+```
+
+```{r, warning= FALSE}
+#graph creation
+groupedbar %>% 
+
+  ggplot(aes(x=country, y= mean_score,lty = "Mean PISA score", group = 1), fill = "darkgrey")+
+  geom_bar(aes(x = country, y = value, fill = Series, group = Series), stat="identity", position="dodge") +
+  geom_line(color = "darkgrey", size = 1.25)+
+  geom_point()+
+  geom_rect(aes(xmin = 9.5, xmax = 10.5, ymin = 0, ymax = 550), color = 'darkblue', linetype = "dashed", alpha = 0)+
+  
+  
+  scale_y_continuous(breaks=seq(0,550,by=100), limits=c(0,600)) +
+  scale_fill_manual(name="", labels = c("Health expenditure per capita","Secondary education expenditure \nper capita"),values = c("lightblue","pink"))+
+  
+
+  scale_colour_discrete(labels = c("Mean PISA score"))+
+  
+  labs(title = "Size isn't everything - Vietnam outperforms in PISA scores",
+       subtitle = "Comparison of similar GDP countries in terms of education/health expenditure",
+       x = "Country", y = "Expenditure")+
+  theme_minimal()+
+
+  
+  theme(plot.title = element_text(face = "bold", size = 18, family = "Oswald"),
+      plot.subtitle=element_text(size=15, family = "Oswald"),
+      plot.caption = element_text(size=9 , family = "Oswald"),
+      axis.text.x = element_text(size= 8, family='Oswald',color="black",angle = 20, vjust = 1),
+      axis.text.y = element_text(size= 9,family = "Oswald",color="black"),
+      axis.title.x = element_text(size= 11, family='Oswald'),
+      axis.title.y = element_text(size= 11, family='Oswald'),
+      plot.title.position = "plot",
+      legend.text = element_text(size = 8, family = "Oswald"),
+      legend.title = element_blank())
+
+```
+font_add("Oswald", "C:\\Users\\Acacia\\AppData\\Local\\Microsoft\\Windows\\Fonts\\Oswald-VariableFont_wght.ttf")
+
+Holding GDP per capita constant (or in other words, choosing countries that had similar GDP per capita range to Morocco), we wanted to know whether government spending on healthcare and secondary schools had a major impact on the average PISA score for each country. It is seen that Vietnam is doing so much better compared to Morocco, governments are spending less on seconday education and healthcare BUT their PISA score is so much higher. It is inevitable to realise that with relatively the same GDP per capita, Morocco is doing the worst. Does this mean that the governments are spending their money at the wrong place?
