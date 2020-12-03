@@ -41,7 +41,10 @@ library(gghighlight)
 library(skimr)
 library(here)
 library(plotly)
+<<<<<<< HEAD
+=======
 library(xlsx)
+>>>>>>> 600b63128833eca73037e250df714ec23095027f
 
 #remotes::install_github("kjhealy/nycdogs")
 library(nycdogs)
@@ -95,7 +98,11 @@ Morocco1_PISA<-Morocco1%>%
 #Plot produced with Tableau using the previous Excel file
 library(png)
 library(grid)
+<<<<<<< HEAD
+img0<-readPNG('Ave_PISA_Morocco1.png')
+=======
 img0<-readPNG('Ave_PISA_Morocco.png')
+>>>>>>> 600b63128833eca73037e250df714ec23095027f
 grid.raster(img0)
 
 ```
@@ -104,7 +111,11 @@ On the map, we can see that Moroccans' average performance isn't good. As benchm
 
 After understanding Morocco's performance in comparison to the rest of the world, we want to further explore the variables that may contribute to the country's underperformance. Primary and secondary education are interesting variables to consider since people taking the PISA scores are young high school students (15  and 16 year old). 
 
+<<<<<<< HEAD
+Therefore, we're going to take a look at net enrolment in primary and secondary education and compare Morocco's numbers with the rest of the world's.
+=======
 Therefore, we're going to take a look at net enrolment in primary and secondary education and compare Morocco's numbers with the rest of the world.
+>>>>>>> 600b63128833eca73037e250df714ec23095027f
 
 
 ```{r Morocco primary education,fig.height=10,fig.width=10}
@@ -129,7 +140,11 @@ primary <- primary_secondary_raw %>%
 # write.xlsx(primary, file = "Morocco_net_primary1.xlsx",
       # sheetName = "Morocco_net_primary1", append = FALSE)
 #Plot produced with Tableau using the previous Excel file
+<<<<<<< HEAD
+img2<-readPNG('Net_Primary_Morocco1.png')
+=======
 img2<-readPNG('Net_Primary_Morocco.png')
+>>>>>>> 600b63128833eca73037e250df714ec23095027f
 grid.raster(img2)
 
 ```
@@ -156,7 +171,11 @@ primary_secondary <- primary_secondary_raw %>%
 
 #Plot produced with Tableau using the previous Excel file
 #knitr::include_graphics('Net_Secondary_Morocco.png')
+<<<<<<< HEAD
+img1<-readPNG('Net_Secondary_Morocco1.png')
+=======
 img1<-readPNG('Net_Secondary_Morocco.png')
+>>>>>>> 600b63128833eca73037e250df714ec23095027f
 grid.raster(img1)
 ```
 On the map, we can observe the world countries' net secondary enrolment rate. Particularly, we can see that Morocco has a low net secondary enrolment rate of only 63.47%. Some other low-performing countries such as Dominican Republic and Panama also have low enrolment rates. In contrast, high-performing countries such as Canada and Finland have very high net secondary enrolment rates, close to 100%. 
